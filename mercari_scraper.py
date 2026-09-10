@@ -41,27 +41,25 @@ from playwright.sync_api import (
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
-# TODO: MEGA シリーズ 18 枚の正確なカード名 / 検索キーワードに置き換える。
-#       既存の mercari_scraper.py にリストがある場合はそれを移植すること。
 CARD_KEYWORDS: list[str] = [
-    "MEGA カード名 01",
-    "MEGA カード名 02",
-    "MEGA カード名 03",
-    "MEGA カード名 04",
-    "MEGA カード名 05",
-    "MEGA カード名 06",
-    "MEGA カード名 07",
-    "MEGA カード名 08",
-    "MEGA カード名 09",
-    "MEGA カード名 10",
-    "MEGA カード名 11",
-    "MEGA カード名 12",
-    "MEGA カード名 13",
-    "MEGA カード名 14",
-    "MEGA カード名 15",
-    "MEGA カード名 16",
-    "MEGA カード名 17",
-    "MEGA カード名 18",
+    "メガルカリオex MUR メガブレイブ",
+    "リーリエの決心 SAR メガブレイブ",
+    "メガサーナイトex MUR メガシンフォニア",
+    "メガサーナイトex SAR メガシンフォニア",
+    "メガリザードンXex MUR インフェルノX",
+    "メガリザードンXex SAR インフェルノX",
+    "メガカイリューex MUR MEGAドリームex",
+    "ピカチュウex SAR MEGAドリームex",
+    "ロケット団のミュウツーex SAR MEGAドリームex",
+    "メガゲンガーex SAR MEGAドリームex",
+    "メガカイリューex SAR MEGAドリームex",
+    "メガジガルデex MUR ムニキスゼロ",
+    "ニャースex SAR ムニキスゼロ",
+    "メイのはげまし SAR ムニキスゼロ",
+    "メガゲッコウガex MUR ニンジャスピナー",
+    "メガゲッコウガex SAR ニンジャスピナー",
+    "メガダークライex MUR アビスアイ",
+    "メガダークライex SAR アビスアイ",
 ]
 
 TOP_N = 3
