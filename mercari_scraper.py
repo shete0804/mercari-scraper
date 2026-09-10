@@ -235,6 +235,17 @@ def scrape_card(page: Page, keyword: str) -> list[Listing]:
             if looks_blocked(page):
                 raise MercariBlockedError(f"ブロックを検知 (keyword={keyword!r})")
 
+            # 並び順を「安い順」に確実に設定
+            try:
+                sort_button = page.locator(
+                    'button:has-text("価格"), [data-testid*="sort"]'
+                ).first
+                if sort_button.is_visible():
+                    sort_button.click()
+                    page.wait_for_load_state("networkidle", timeout=NAV_TIMEOUT_MS)
+            except Exception:
+                pass
+
             return parse_listings(page, keyword)
 
         except MercariBlockedError:
