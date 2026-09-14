@@ -53,7 +53,7 @@ CARD_KEYWORDS: list[str] = [
     "ピカチュウex SAR MEGAドリームex",
     "ロケット団のミュウツーex SAR MEGAドリームex",
     "メガゲンガーex SAR MEGAドリームex",
-    "メガカイリューex SAR MEガカイリューex",
+    "メガカイリューex SAR MEGAドリームex",
     "メガジガルデex MUR ムニキスゼロ",
     "ニャースex SAR ムニキスゼロ",
     "メイのはげまし SAR ムニキスゼロ",
@@ -260,8 +260,14 @@ def parse_listings(page: Page, card: str) -> list[Listing]:
                     try:
                         price_elem = cell.locator(price_selector).first
                         price_text = price_elem.inner_text(timeout=1000).strip()
-                        match = re.search(r'(\d+(?:,\d+)*)', price_text)
+                        # ¥ 記号の直後の数字を確実に抽出
+                        match = re.search(r'¥\s*(\d+(?:,\d+)*)', price_text)
                         if match:
+                            price = int(match.group(1).replace(',', ''))
+                            break
+                        # フォールバック：¥ なしで最初の数字列を取得
+                        match = re.search(r'(\d+(?:,\d+)*)', price_text)
+                        if match and len(match.group(1)) >= 3:  # 最低 100 円以上
                             price = int(match.group(1).replace(',', ''))
                             break
                     except Exception:
