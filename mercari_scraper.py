@@ -3,7 +3,8 @@
 メルカリ MEGA シリーズ カード価格モニター
 =========================================
 
-対象カードごとにメルカリ検索ページを開き、「販売中」かつ「価格の安い順」で
+対象カードごとにメルカリ検索ページを開き105
+、「販売中」かつ「価格の安い順」で
 上位 3 件（カード名・価格・URL）を取得して Discord に Embed 形式で通知する。
 
 GitHub Actions から 6 時間ごとに実行される想定。
@@ -104,7 +105,7 @@ EXCLUDE_KEYWORDS: list[str] = [
 # status=on_sale（販売中のみ）
 # 並び順はボタンクリックで動的に設定
 SEARCH_URL_TEMPLATE = (
-    "https://jp.mercari.com/search?keyword={keyword}&status=on_sale"
+    "https://jp.mercari.com/search?keyword={keyword}&status=on_sale&sort=price&order=asc"
 )
 
 
