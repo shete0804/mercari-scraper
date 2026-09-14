@@ -3,8 +3,7 @@
 メルカリ MEGA シリーズ カード価格モニター
 =========================================
 
-対象カードごとにメルカリ検索ページを開き105
-、「販売中」かつ「価格の安い順」で
+対象カードごとにメルカリ検索ページを開き、「販売中」かつ「価格の安い順」で
 上位 3 件（カード名・価格・URL）を取得して Discord に Embed 形式で通知する。
 
 GitHub Actions から 6 時間ごとに実行される想定。
@@ -54,7 +53,7 @@ CARD_KEYWORDS: list[str] = [
     "ピカチュウex SAR MEGAドリームex",
     "ロケット団のミュウツーex SAR MEGAドリームex",
     "メガゲンガーex SAR MEGAドリームex",
-    "メガカイリューex SAR MEGAドリームex",
+    "メガカイリューex SAR MEガカイリューex",
     "メガジガルデex MUR ムニキスゼロ",
     "ニャースex SAR ムニキスゼロ",
     "メイのはげまし SAR ムニキスゼロ",
@@ -102,8 +101,7 @@ EXCLUDE_KEYWORDS: list[str] = [
     "5P",
 ]
 
-# status=on_sale（販売中のみ）
-# 並び順はボタンクリックで動的に設定
+# status=on_sale（販売中のみ）、sort=price&order=asc（安い順）
 SEARCH_URL_TEMPLATE = (
     "https://jp.mercari.com/search?keyword={keyword}&status=on_sale&sort=price&order=asc"
 )
@@ -181,51 +179,111 @@ def parse_listings(page: Page, card: str) -> list[Listing]:
     セレクタはメルカリの DOM 変更で壊れやすいので、実際のページを
     確認して調整すること（DevTools で item-cell / price を確認）。
     """
-    page.wait_for_selector('[data-testid="item-cell"]', timeout=NAV_TIMEOUT_MS)
-    cells = page.locator('[data-testid="item-cell"]')
-
     results: list[Listing] = []
-    processed = 0
 
-    for i in range(cells.count()):
-        if len(results) >= TOP_N:
-            break
+    try:
+        # セレクタの複数候補を試す
+        selectors = [
+            '[data-testid="item-cell"]',
+            '[class*="itemCell"]',
+            'div[class*="item"][class*="cell"]',
+            'a[class*="item"]',
+        ]
 
-        cell = cells.nth(i)
-
-        # タイトルを取得
-        title_elem = cell.locator('[class*="title"], h2, [data-testid*="title"]').first
-        title = title_elem.inner_text() if title_elem.is_visible() else ""
-
-        # シングルカード判定
-        if not is_single_card(title):
-            processed += 1
-            continue
-
-        href = cell.locator("a").first.get_attribute("href") or ""
-        if href.startswith("/"):
-            href = "https://jp.mercari.com" + href
-
-        # 価格を取得（実際のセレクタで確実に）
-        try:
-            # メルカリの実際のセレクタ: span.merPrice または [class*="priceContainer"]
-            price_elem = cell.locator('span.merPrice').first
-            if not price_elem.is_visible():
-                # フォールバック
-                price_elem = cell.locator('[class*="priceContainer"]').first
-            if not price_elem.is_visible():
+        cells = None
+        for selector in selectors:
+            try:
+                page.wait_for_selector(selector, timeout=5000)
+                cells = page.locator(selector)
+                cell_count = cells.count()
+                if cell_count > 0:
+                    print(f"セレクタ成功: {selector} (件数: {cell_count})", file=sys.stderr)
+                    break
+            except Exception as e:
+                print(
+                    f"セレクタ失敗: {selector} - {type(e).__name__}",
+                    file=sys.stderr,
+                )
+                cells = None
                 continue
-            price_text = price_elem.inner_text().strip()
-            # ¥\n9,999 の形式から数字だけを抽出
-            match = re.search(r'(\d+(?:,\d+)*)', price_text)
-            if not match:
-                continue
-            price = int(match.group(1).replace(',', ''))
-        except Exception:
-            continue
 
-        results.append(Listing(card=card, price=price, url=href))
-        processed += 1
+        if cells is None or cells.count() == 0:
+            print(
+                f"警告: {card} - 有効なセレクタが見つかりません。"
+                f"最新のページHTMLを確認してください。",
+                file=sys.stderr,
+            )
+            return results
+
+        for i in range(cells.count()):
+            if len(results) >= TOP_N:
+                break
+
+            try:
+                cell = cells.nth(i)
+
+                # タイトルを取得
+                title_elem = cell.locator(
+                    '[class*="title"], h2, [data-testid*="title"]'
+                ).first
+                title = ""
+                try:
+                    title = title_elem.inner_text(timeout=1000)
+                except Exception:
+                    pass
+
+                # シングルカード判定
+                if not is_single_card(title):
+                    continue
+
+                href = ""
+                try:
+                    href = cell.locator("a").first.get_attribute("href") or ""
+                except Exception:
+                    pass
+
+                if not href:
+                    continue
+
+                if href.startswith("/"):
+                    href = "https://jp.mercari.com" + href
+
+                # 価格を取得
+                price = None
+                price_selectors = [
+                    'span.merPrice',
+                    '[class*="priceContainer"]',
+                    '[class*="price"]',
+                ]
+
+                for price_selector in price_selectors:
+                    try:
+                        price_elem = cell.locator(price_selector).first
+                        price_text = price_elem.inner_text(timeout=1000).strip()
+                        match = re.search(r'(\d+(?:,\d+)*)', price_text)
+                        if match:
+                            price = int(match.group(1).replace(',', ''))
+                            break
+                    except Exception:
+                        continue
+
+                if price is None:
+                    continue
+
+                results.append(Listing(card=card, price=price, url=href))
+
+            except Exception as e:
+                print(
+                    f"アイテム処理エラー ({card}, インデックス {i}): {type(e).__name__}",
+                    file=sys.stderr,
+                )
+                continue
+
+    except Exception as e:
+        print(
+            f"parse_listings エラー ({card}): {type(e).__name__} - {e}",
+            file=sys.stderr,
+        )
 
     return results
 
@@ -245,28 +303,31 @@ def scrape_card(page: Page, keyword: str) -> list[Listing]:
             if looks_blocked(page):
                 raise MercariBlockedError(f"ブロックを検知 (keyword={keyword!r})")
 
-            # 通常出品（オークション除外）にフィルタ
+            # 通常出品（オークション除外）にフィルタ - タイムアウトなしで試す
+            # 失敗しても継続（URLパラメータで十分）
             try:
                 normal_sale_checkbox = page.locator(
                     'input[type="checkbox"][value*="B38F1DC"], '
                     'label:has-text("通常出品") >> input'
                 ).first
-                if normal_sale_checkbox.is_visible():
-                    normal_sale_checkbox.click()
-                    page.wait_for_load_state("networkidle", timeout=NAV_TIMEOUT_MS)
-            except Exception:
-                pass
+                # is_visible() がハング する可能性があるため、タイムアウト短い try-except で
+                try:
+                    page.set_default_timeout(2000)
+                    if normal_sale_checkbox.is_visible():
+                        normal_sale_checkbox.click()
+                        page.wait_for_load_state("networkidle", timeout=5000)
+                except PlaywrightTimeoutError:
+                    pass
+                finally:
+                    page.set_default_timeout(NAV_TIMEOUT_MS)
+            except Exception as e:
+                print(
+                    f"通常出品フィルタ適用失敗 ({keyword}): {type(e).__name__}",
+                    file=sys.stderr,
+                )
 
-            # 並び順を「安い順」に確実に設定
-            try:
-                sort_button = page.locator(
-                    'button:has-text("価格"), [data-testid*="sort"]'
-                ).first
-                if sort_button.is_visible():
-                    sort_button.click()
-                    page.wait_for_load_state("networkidle", timeout=NAV_TIMEOUT_MS)
-            except Exception:
-                pass
+            # ページが十分読み込まれるまで待機
+            page.wait_for_load_state("networkidle", timeout=NAV_TIMEOUT_MS)
 
             return parse_listings(page, keyword)
 
@@ -275,7 +336,7 @@ def scrape_card(page: Page, keyword: str) -> list[Listing]:
         except Exception as err:  # noqa: BLE001 - リトライ対象は広く取る
             last_err = err
             print(
-                f"[retry {attempt}/{MAX_RETRIES}] {keyword}: {err}",
+                f"[retry {attempt}/{MAX_RETRIES}] {keyword}: {type(err).__name__}: {err}",
                 file=sys.stderr,
             )
             if attempt < MAX_RETRIES:
