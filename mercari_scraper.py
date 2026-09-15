@@ -118,6 +118,7 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
     try:
         print(f"検索中: {keyword}", file=sys.stderr)
         results = await m.search(keyword)
+        print(f"DEBUG: results.items count = {len(results.items)}, meta.num_found = {results.meta.num_found}", file=sys.stderr)
 
         for item in results.items:
             if len(listings) >= TOP_N:
