@@ -27,7 +27,6 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 from mercapi import Mercapi
-from mercapi.requests.search import SearchRequestData
 
 # ---------------------------------------------------------------------------
 # 設定
@@ -118,7 +117,7 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
 
     try:
         print(f"検索中: {keyword}", file=sys.stderr)
-        results = await m.search(keyword, status=[SearchRequestData.Status.on_sale])
+        results = await m.search(keyword)
 
         for item in results.items:
             if len(listings) >= TOP_N:
