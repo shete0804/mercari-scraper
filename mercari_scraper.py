@@ -133,9 +133,7 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
                     print(f"除外: {item.name} (status={item.status})", file=sys.stderr)
                     continue
 
-                print(f"DEBUG: {item.name} - auction={item.auction}, auction.id_={item.auction.id_ if item.auction else 'N/A'}", file=sys.stderr)
-
-                if item.auction and item.auction.id_:
+                if item.auction.id_ is not None:
                     print(f"除外: {item.name} (オークション)", file=sys.stderr)
                     continue
 
