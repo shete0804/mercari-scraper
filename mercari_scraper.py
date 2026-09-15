@@ -131,6 +131,10 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
             try:
                 if item.status != "ITEM_STATUS_ON_SALE":
                     print(f"除外: {item.name} (status={item.status})", file=sys.stderr)
+
+                                    if hasattr(item, 'type') and item.type == "ITEM_TYPE_AUCTION":
+                                                            print(f"除外: {item.name} (オークション)", file=sys.stderr)
+                                                            continue
                     continue
 
                 price = item.price
