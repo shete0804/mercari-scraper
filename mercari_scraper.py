@@ -11,10 +11,10 @@ GitHub Actions から 6 時間ごとに実行される想定。
 必要な環境変数:
     DISCORD_WEBHOOK_URL   Discord Incoming Webhook の URL
 
-    必要なライブラリ:
-        mercapi               メルカリ.jp API ラッパー
-            requests              HTTP リクエスト送信
-            """
+必要なライブラリ:
+    mercapi               メルカリ.jp API ラッパー
+    requests              HTTP リクエスト送信
+"""
 
 from __future__ import annotations
 
@@ -35,24 +35,24 @@ from mercapi import Mercapi
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
 CARD_KEYWORDS: list[str] = [
-      "メガルカリオex MUR メガブレイブ",
-      "リーリエの決心 SAR メガブレイブ",
-      "メガサーナイトex MUR メガシンフォニア",
-      "メガサーナイトex SAR メガシンフォニア",
-      "メガリザードンXex MUR インフェルノX",
-      "メガリザードンXex SAR インフェルノX",
-      "メガカイリューex MUR MEGAドリームex",
-      "ピカチュウex SAR MEGAドリームex",
-      "ロケット団のミュウツーex SAR MEGAドリームex",
-      "メガゲンガーex SAR MEGAドリームex",
-      "メガカイリューex SAR MEGAドリームex",
-      "メガジガルデex MUR ムニキスゼロ",
-      "ニャースex SAR ムニキスゼロ",
-      "メイのはげまし SAR ムニキスゼロ",
-      "メガゲッコウガex MUR ニンジャスピナー",
-      "メガゲッコウガex SAR ニンジャスピナー",
-      "メガダークライex MUR アビスアイ",
-      "メガダークライex SAR アビスアイ",
+    "メガルカリオex MUR メガブレイブ",
+    "リーリエの決心 SAR メガブレイブ",
+    "メガサーナイトex MUR メガシンフォニア",
+    "メガサーナイトex SAR メガシンフォニア",
+    "メガリザードンXex MUR インフェルノX",
+    "メガリザードンXex SAR インフェルノX",
+    "メガカイリューex MUR MEGAドリームex",
+    "ピカチュウex SAR MEGAドリームex",
+    "ロケット団のミュウツーex SAR MEGAドリームex",
+    "メガゲンガーex SAR MEGAドリームex",
+    "メガカイリューex SAR MEガドリームex",
+    "メガジガルデex MUR ムニキスゼロ",
+    "ニャースex SAR ムニキスゼロ",
+    "メイのはげまし SAR ムニキスゼロ",
+    "メガゲッコウガex MUR ニンジャスピナー",
+    "メガゲッコウガex SAR ニンジャスピナー",
+    "メガダークライex MUR アビスアイ",
+    "メガダークライex SAR アビスアイ",
 ]
 
 TOP_N = 3
@@ -61,35 +61,35 @@ JST = timezone(timedelta(hours=9))
 
 # 除外キーワード（セット販売、複数枚販売など）
 EXCLUDE_KEYWORDS: set[str] = {
-      "セット",
-      "2枚",
-      "3枚",
-      "4枚",
-      "5枚",
-      "10枚",
-      "20枚",
-      "5パック",
-      "10パック",
-      "Box",
-      "ボックス",
-      "まとめ売り",
-      "福袋",
-      "構築済みデッキ",
-      "デッキ",
-      "旧裏",
-      "おまけ",
-      "2P",
-      "3P",
-      "4P",
-      "5P",
+    "セット",
+    "2枚",
+    "3枚",
+    "4枚",
+    "5枚",
+    "10枚",
+    "20枚",
+    "5パック",
+    "10パック",
+    "Box",
+    "ボックス",
+    "まとめ売り",
+    "福袋",
+    "構築済みデッキ",
+    "デッキ",
+    "旧裏",
+    "おまけ",
+    "2P",
+    "3P",
+    "4P",
+    "5P",
 }
 
 
 @dataclass
 class Listing:
-      card: str
-      price: int
-      url: str
+    card: str
+    price: int
+    url: str
 
 
 # ---------------------------------------------------------------------------
@@ -98,12 +98,12 @@ class Listing:
 
 
 def is_single_card(title: str) -> bool:
-      """タイトルからシングルカードかどうか判定する。
+    """タイトルからシングルカードかどうか判定する。
 
-          セット販売や複数枚販売、タイトル詐欺を除外する。
-              """
-      title_lower = title.lower()
-      return not any(keyword in title_lower for keyword in EXCLUDE_KEYWORDS)
+    セット販売や複数枚販売、タイトル詐欺を除外する。
+    """
+    title_lower = title.lower()
+    return not any(keyword in title_lower for keyword in EXCLUDE_KEYWORDS)
 
 
 # ---------------------------------------------------------------------------
@@ -112,71 +112,71 @@ def is_single_card(title: str) -> bool:
 
 
 async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
-      """1 カード分の検索結果を取得する。"""
-      listings: list[Listing] = []
+    """1 カード分の検索結果を取得する。"""
+    listings: list[Listing] = []
 
     try:
-              print(f"検索中: {keyword}", file=sys.stderr)
-              results = await m.search(keyword)
+        print(f"検索中: {keyword}", file=sys.stderr)
+        results = await m.search(keyword)
 
         for item in results.items:
-                      if len(listings) >= TOP_N:
-                                        break
+            if len(listings) >= TOP_N:
+                break
 
-                      if not is_single_card(item.name):
-                                        print(f"除外: {item.name}", file=sys.stderr)
-                                        continue
+            if not is_single_card(item.name):
+                print(f"除外: {item.name}", file=sys.stderr)
+                continue
 
-                      try:
-                                        price = item.price
-                                        url = item.url
+            try:
+                price = item.price
+                url = item.url
 
-                          if price is None or price <= 0:
-                                                print(f"無効な価格: {item.name} ({price})", file=sys.stderr)
-                                                continue
+                if price is None or price <= 0:
+                    print(f"無効な価格: {item.name} ({price})", file=sys.stderr)
+                    continue
 
                 listings.append(Listing(card=keyword, price=price, url=url))
                 print(
-                                      f"取得: {item.name} - ¥{price:,}",
-                                      file=sys.stderr,
+                    f"取得: {item.name} - ¥{price:,}",
+                    file=sys.stderr,
                 )
 
-except Exception as e:
+            except Exception as e:
                 print(
-                                      f"アイテム処理エラー ({keyword}): {type(e).__name__}: {e}",
-                                      file=sys.stderr,
+                    f"アイテム処理エラー ({keyword}): {type(e).__name__}: {e}",
+                    file=sys.stderr,
                 )
                 continue
 
         print(f"完了: {keyword} ({len(listings)} 件)", file=sys.stderr)
 
-except Exception as e:
+    except Exception as e:
         print(
-                      f"検索エラー ({keyword}): {type(e).__name__}: {e}",
-                      file=sys.stderr,
+            f"検索エラー ({keyword}): {type(e).__name__}: {e}",
+            file=sys.stderr,
         )
 
     return listings
 
 
 async def fetch_all() -> tuple[dict[str, list[Listing]], dict[str, str]]:
-      """全カードを並行して取得する。"""
+    """全カードを並行して取得する。"""
     results: dict[str, list[Listing]] = {}
     errors: dict[str, str] = {}
 
     m = Mercapi()
 
     try:
-              tasks = [search_card(m, keyword) for keyword in CARD_KEYWORDS]
+        tasks = [search_card(m, keyword) for keyword in CARD_KEYWORDS]
         search_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         for keyword, result in zip(CARD_KEYWORDS, search_results):
-                      if isinstance(result, Exception):
-                                        errors[keyword] = str(result)
-else:
+            if isinstance(result, Exception):
+                errors[keyword] = str(result)
+            else:
                 results[keyword] = result
 
-except Exception as e:
+    except Exception as e:
         print(f"fetch_all エラー: {type(e).__name__}: {e}", file=sys.stderr)
 
     return results, errors
@@ -188,51 +188,51 @@ except Exception as e:
 
 
 def _now_jst() -> str:
-      return datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
+    return datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
 
 
 def _fmt_price(price: int) -> str:
-      return f"¥{price:,}"
+    return f"¥{price:,}"
 
 
 def _send(payload: dict) -> None:
-      if not DISCORD_WEBHOOK_URL:
-                print("DISCORD_WEBHOOK_URL 未設定のため送信をスキップ", file=sys.stderr)
+    if not DISCORD_WEBHOOK_URL:
+        print("DISCORD_WEBHOOK_URL 未設定のため送信をスキップ", file=sys.stderr)
         return
     resp = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=15)
     resp.raise_for_status()
 
 
 def post_report(results: dict[str, list[Listing]], errors: dict[str, str]) -> None:
-      """カードごとに最安 TOP_N 件をまとめた Embed を 1 通送る。"""
+    """カードごとに最安 TOP_N 件をまとめた Embed を 1 通送る。"""
     fields = []
     for keyword in CARD_KEYWORDS:
-              listings = results.get(keyword, [])
+        listings = results.get(keyword, [])
         if listings:
-                      value = "\n".join(f"[{_fmt_price(l.price)}]({l.url})" for l in listings)
-elif keyword in errors:
+            value = "\n".join(f"[{_fmt_price(l.price)}]({l.url})" for l in listings)
+        elif keyword in errors:
             value = f"⚠️ 取得失敗: {errors[keyword][:200]}"
-else:
+        else:
             value = "販売中の出品なし"
         fields.append({"name": keyword, "value": value, "inline": False})
 
     embed = {
-              "title": "メルカリ MEGA シリーズ 最安値レポート",
-              "description": f"販売中・最安 {TOP_N} 件 / {_now_jst()}",
-              "color": 0xE60012,
-              "fields": fields[:25],
-              "footer": {"text": "6 時間ごと自動実行"},
+        "title": "メルカリ MEGA シリーズ 最安値レポート",
+        "description": f"販売中・最安 {TOP_N} 件 / {_now_jst()}",
+        "color": 0xE60012,
+        "fields": fields[:25],
+        "footer": {"text": "6 時間ごと自動実行"},
     }
     _send({"embeds": [embed]})
 
 
 def post_failure(title: str, detail: str) -> None:
-      embed = {
-                "title": title,
-                "description": f"```\n{detail[:3800]}\n```",
-                "color": 0xFF0000,
-                "footer": {"text": _now_jst()},
-      }
+    embed = {
+        "title": title,
+        "description": f"```\n{detail[:3800]}\n```",
+        "color": 0xFF0000,
+        "footer": {"text": _now_jst()},
+    }
     _send({"embeds": [embed]})
 
 
@@ -242,27 +242,27 @@ def post_failure(title: str, detail: str) -> None:
 
 
 def main() -> int:
-      if not DISCORD_WEBHOOK_URL:
-                print("環境変数 DISCORD_WEBHOOK_URL が必要です", file=sys.stderr)
+    if not DISCORD_WEBHOOK_URL:
+        print("環境変数 DISCORD_WEBHOOK_URL が必要です", file=sys.stderr)
         return 1
 
     try:
-              results, errors = asyncio.run(fetch_all())
-except Exception:
+        results, errors = asyncio.run(fetch_all())
+    except Exception:
         post_failure("スクレイピング失敗", traceback.format_exc())
         return 1
 
     if errors and len(errors) == len(CARD_KEYWORDS):
-              detail = "\n".join(f"- {k}: {v}" for k, v in errors.items())
+        detail = "\n".join(f"- {k}: {v}" for k, v in errors.items())
         post_failure("スクレイピング失敗", detail)
         return 1
 
     post_report(results, errors)
 
     if errors:
-              print(f"{len(errors)} 件のカードで取得失敗", file=sys.stderr)
+        print(f"{len(errors)} 件のカードで取得失敗", file=sys.stderr)
     return 0
 
 
 if __name__ == "__main__":
-      sys.exit(main())    
+    sys.exit(main())
