@@ -129,6 +129,10 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
                 continue
 
             try:
+                if item.status != "販売中":
+                    print(f"除外: {item.name} (status={item.status})", file=sys.stderr)
+                    continue
+
                 price = item.price
                 url = f"https://jp.mercari.com/item/{item.id_}"
 
