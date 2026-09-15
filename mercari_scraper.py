@@ -27,6 +27,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 from mercapi import Mercapi
+from mercapi.requests.search import SearchRequestData
 
 # ---------------------------------------------------------------------------
 # 設定
@@ -45,7 +46,7 @@ CARD_KEYWORDS: list[str] = [
     "ピカチュウex SAR MEGAドリームex",
     "ロケット団のミュウツーex SAR MEGAドリームex",
     "メガゲンガーex SAR MEGAドリームex",
-    "メガカイリューex SAR MEガドリームex",
+    "メガカイリューex SAR MEGAドリームex",
     "メガジガルデex MUR ムニキスゼロ",
     "ニャースex SAR ムニキスゼロ",
     "メイのはげまし SAR ムニキスゼロ",
@@ -117,7 +118,7 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
 
     try:
         print(f"検索中: {keyword}", file=sys.stderr)
-        results = await m.search(keyword)
+        results = await m.search(keyword, status=[SearchRequestData.Status.on_sale])
 
         for item in results.items:
             if len(listings) >= TOP_N:
