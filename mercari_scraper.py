@@ -1,3 +1,4 @@
+hurl = item.url    url = f"https://jp.mercari.com/item/{item.id_}"
 #!/usr/bin/env python3
 """
 メルカリ MEGA シリーズ カード価格モニター
