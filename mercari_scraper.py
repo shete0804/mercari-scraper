@@ -1,4 +1,3 @@
-hurl = item.url    url = f"https://jp.mercari.com/item/{item.id_}"
 #!/usr/bin/env python3
 """
 メルカリ MEGA シリーズ カード価格モニター
@@ -131,7 +130,7 @@ async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
 
             try:
                 price = item.price
-                url = item.url
+                url = f"https://jp.mercari.com/item/{item.id_}"
 
                 if price is None or price <= 0:
                     print(f"無効な価格: {item.name} ({price})", file=sys.stderr)
