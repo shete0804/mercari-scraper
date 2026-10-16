@@ -43,6 +43,10 @@ RETRY_WAIT_SEC = 5
 MAX_PAGES = 10  # 検索結果を読むページ数（1ページ最大120件）。並び替えはできないので、読んだ中から安い順に選ぶ
 MAX_DETAIL_CHECKS = 8  # 商品詳細を開いて確かめる上限（カードごと）
 
+# 商品の状態：新品・未使用、未使用に近い、目立った傷や汚れなし、やや傷や汚れあり
+# （傷や汚れあり＝5、全体的に状態が悪い＝6 は外す）
+CONDITION_IDS: list[int] = [1, 2, 3, 4]
+
 JST = timezone(timedelta(hours=9))
 
 
@@ -226,7 +230,10 @@ async def with_retry(label: str, func):
 
 async def search_window(m: PagedMercapi, keyword: str, price_min: int) -> list:
     """販売中・下限つきで、結果を MAX_PAGES ページまで読む。"""
-    kwargs = {"status": [SearchRequestData.Status.STATUS_ON_SALE]}
+    kwargs = {
+        "status": [SearchRequestData.Status.STATUS_ON_SALE],
+        "item_conditions": CONDITION_IDS,
+    }
     if price_min > 0:
         kwargs["price_min"] = price_min
 
@@ -288,6 +295,9 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
             continue
         if detail.price < floor:
             print(f"[除外] 下限未満: {detail.price} < {floor} {item.id_}", file=sys.stderr)
+            continue
+        if detail.item_condition is None or detail.item_condition.id_ not in CONDITION_IDS:
+            print(f"[除外] 状態が範囲外: {item.id_}", file=sys.stderr)
             continue
 
         desc = detail.description or ""
