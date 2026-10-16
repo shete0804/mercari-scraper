@@ -40,8 +40,7 @@ DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 TOP_N = 3
 MAX_RETRIES = 3
 RETRY_WAIT_SEC = 5
-WINDOW1_LIMIT = 40  # 1つ目の検索語（名前＋レア度または色）で見る件数
-WINDOW2_LIMIT = 10  # 2つ目の検索語（名前だけ）で見る件数
+MAX_PAGES = 10  # 検索結果を読むページ数（1ページ最大120件）。並び替えはできないので、読んだ中から安い順に選ぶ
 MAX_DETAIL_CHECKS = 8  # 商品詳細を開いて確かめる上限（カードごと）
 
 JST = timezone(timedelta(hours=9))
@@ -121,13 +120,16 @@ SAR_RE = re.compile(r"(?<![A-Za-z])SAR(?![A-Za-z])", re.IGNORECASE)
 NUMBER_RE = re.compile(r"(\d{1,3})\s*/\s*(\d{1,3})")
 
 
-class PriceSortedMercapi(Mercapi):
-    """検索を「価格の安い順」にする（mercapi の標準は「おすすめ順」）。"""
+class PagedMercapi(Mercapi):
+    """検索結果のページを指定できるようにする（mercapi は次のページの番号を返すが、指定の口はない）。
+
+    並び替えの指定は効かない（どの値でも「おすすめ順」になる）ため、ページを読んで自分で並べる。
+    """
+
+    page_token = ""
 
     def _search(self, search_request_data):
-        condition = search_request_data.data["searchCondition"]
-        condition["sort"] = "SORT_PRICE"
-        condition["order"] = "ORDER_ASC"
+        search_request_data.data["pageToken"] = self.page_token
         return super()._search(search_request_data)
 
 
@@ -198,7 +200,8 @@ def name_passes(name: str, card: CardRule) -> bool:
 # ---------------------------------------------------------------------------
 
 def is_on_sale(item) -> bool:
-    return item.status == "ITEM_STATUS_ON_SALE"
+    # 検索結果は ITEM_STATUS_ON_SALE、商品詳細は on_sale と表記が違う
+    return item.status in ("ITEM_STATUS_ON_SALE", "on_sale")
 
 
 def is_auction(item) -> bool:
@@ -221,33 +224,47 @@ async def with_retry(label: str, func):
     raise RuntimeError(f"{label} を {MAX_RETRIES} 回試行して取得失敗: {last_err}")
 
 
-async def search_window(m: PriceSortedMercapi, keyword: str, price_min: int):
-    """販売中・安い順・下限つきで 1 回検索する（1 ページ＝最大 120 件）。"""
+async def search_window(m: PagedMercapi, keyword: str, price_min: int) -> list:
+    """販売中・下限つきで、結果を MAX_PAGES ページまで読む。"""
     kwargs = {"status": [SearchRequestData.Status.STATUS_ON_SALE]}
     if price_min > 0:
         kwargs["price_min"] = price_min
-    results = await m.search(keyword, **kwargs)
-    prices = [item.price for item in results.items]
-    if prices != sorted(prices):
-        print(f"警告: 価格順になっていません: {keyword} {prices[:10]}", file=sys.stderr)
-    return results.items
+
+    items: list = []
+    complete = False
+    m.page_token = ""
+    for _ in range(MAX_PAGES):
+        results = await m.search(keyword, **kwargs)
+        items.extend(results.items)
+        next_token = results.meta.next_page_token or ""
+        if not next_token or not results.items:
+            complete = True
+            break
+        m.page_token = next_token
+    m.page_token = ""
+    print(
+        f"[検索] {keyword} 下限{price_min:,}: {len(items)} 件を読んだ "
+        f"（全体 {results.meta.num_found} 件、全部読んだ={complete}）",
+        file=sys.stderr,
+    )
+    return items
 
 
-async def scrape_card(m: PriceSortedMercapi, card: CardRule) -> list[Listing]:
+async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     """1 カード分の上位 TOP_N 件を取る。"""
     windows = [
-        (card.keywords[0], card.floor, WINDOW1_LIMIT),
-        (card.keywords[-1], max(card.floor, card.floor_second), WINDOW2_LIMIT),
+        (card.keywords[0], card.floor),
+        (card.keywords[-1], max(card.floor, card.floor_second)),
     ]
 
     # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
     pool: dict[str, tuple[object, str, int]] = {}
-    for keyword, floor, limit in windows:
+    for keyword, floor in windows:
         items = await with_retry(
             f"{card.name} [{keyword}]",
             lambda k=keyword, f=floor: search_window(m, k, f),
         )
-        for item in items[:limit]:
+        for item in items:
             pool.setdefault(item.id_, (item, keyword, floor))
 
     listings: list[Listing] = []
@@ -302,7 +319,7 @@ async def fetch_all() -> tuple[dict[str, list[Listing]], dict[str, str]]:
     results: dict[str, list[Listing]] = {}
     errors: dict[str, str] = {}
 
-    m = PriceSortedMercapi()
+    m = PagedMercapi()
     for card in CARDS:
         try:
             results[card.name] = await scrape_card(m, card)
