@@ -242,8 +242,9 @@ async def search_window(m: PagedMercapi, keyword: str, price_min: int) -> list:
             break
         m.page_token = next_token
     m.page_token = ""
+    unique = len({item.id_ for item in items})
     print(
-        f"[検索] {keyword} 下限{price_min:,}: {len(items)} 件を読んだ "
+        f"[検索] {keyword} 下限{price_min:,}: {unique} 件を読んだ "
         f"（全体 {results.meta.num_found} 件、全部読んだ={complete}）",
         file=sys.stderr,
     )
@@ -323,6 +324,8 @@ async def fetch_all() -> tuple[dict[str, list[Listing]], dict[str, str]]:
     for card in CARDS:
         try:
             results[card.name] = await scrape_card(m, card)
+            for listing in results[card.name]:
+                print(f"[合格] {card.name} {_fmt_price(listing.price)} {listing.name} {listing.url}", file=sys.stderr)
         except Exception as err:  # noqa: BLE001
             errors[card.name] = f"{type(err).__name__}: {err}"
 
