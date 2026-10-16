@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-メルカリ MEGA シリーズ カード価格モニター
-=========================================
+メルカリ カード価格モニター（PayPayフリマ版と同じ 13 カード）
+==========================================================
 
-対象カードごとにメルカリ検索を実行し、「販売中」かつ「価格の安い順」で
-上位 3 件（カード名・価格・URL）を取得して Discord に Embed 形式で通知する。
+対象カードごとにメルカリを検索し、「販売中」かつ「価格の安い順」で候補を読む。
+名前・番号・レア度・値段の下限で絞り込み、商品詳細を開いて
+販売中・説明文を確かめたものだけ、上位 3 件として Discord に送る。
 
 GitHub Actions から 6 時間ごとに実行される想定。
 
@@ -20,13 +21,15 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import sys
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
 import requests
 from mercapi import Mercapi
+from mercapi.requests import SearchRequestData
 
 # ---------------------------------------------------------------------------
 # 設定
@@ -34,159 +37,277 @@ from mercapi import Mercapi
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
-CARD_KEYWORDS: list[str] = [
-    "メガルカリオex MUR メガブレイブ",
-    "リーリエの決心 SAR メガブレイブ",
-    "メガサーナイトex MUR メガシンフォニア",
-    "メガサーナイトex SAR メガシンフォニア",
-    "メガリザードンXex MUR インフェルノX",
-    "メガリザードンXex SAR インフェルノX",
-    "メガカイリューex MUR MEGAドリームex",
-    "ピカチュウex SAR MEGAドリームex",
-    "ロケット団のミュウツーex SAR MEGAドリームex",
-    "メガゲンガーex SAR MEGAドリームex",
-    "メガカイリューex SAR MEGAドリームex",
-    "メガジガルデex MUR ムニキスゼロ",
-    "ニャースex SAR ムニキスゼロ",
-    "メイのはげまし SAR ムニキスゼロ",
-    "メガゲッコウガex MUR ニンジャスピナー",
-    "メガゲッコウガex SAR ニンジャスピナー",
-    "メガダークライex MUR アビスアイ",
-    "メガダークライex SAR アビスアイ",
-]
-
 TOP_N = 3
+MAX_RETRIES = 3
+RETRY_WAIT_SEC = 5
+WINDOW1_LIMIT = 40  # 1つ目の検索語（名前＋レア度または色）で見る件数
+WINDOW2_LIMIT = 10  # 2つ目の検索語（名前だけ）で見る件数
+MAX_DETAIL_CHECKS = 8  # 商品詳細を開いて確かめる上限（カードごと）
 
 JST = timezone(timedelta(hours=9))
 
-# 除外キーワード（セット販売、複数枚販売など）
-EXCLUDE_KEYWORDS: set[str] = {
-    "セット",
-    "2枚",
-    "3枚",
-    "4枚",
-    "5枚",
-    "10枚",
-    "20枚",
-    "5パック",
-    "10パック",
-    "Box",
-    "ボックス",
-    "まとめ売り",
-    "福袋",
-    "構築済みデッキ",
-    "デッキ",
-    "旧裏",
-    "おまけ",
-    "2P",
-    "3P",
-    "4P",
-    "5P",
-}
+
+@dataclass
+class CardRule:
+    """1 枚分の判定ルール（PayPay 版の target.yaml と同じ考え方）。
+
+    keywords:      検索語。1つ目は名前＋レア度・色、2つ目は名前だけ。
+    floor:         値段の下限（買取の 8 割など）。両方の検索に付ける。
+    floor_second:  2つ目の検索だけに付ける下限（ミュウの色ごと）。
+    required:      名前に必要な言葉（例：G/RGB, MUR）。
+    exclude_names: 名前にあれば外す言葉（そのカードの別の色など）。
+    number:        番号（例：095/069）。別の番号が書いてある出品は外す。番号がない出品は残す。
+    sa_required:   名前に SA があるものだけ残す。
+    desc_sar:      名前にレア度がない候補は、商品の説明に SAR があるかを確かめる。
+    """
+
+    name: str
+    keywords: list[str]
+    floor: int = 0
+    floor_second: int = 0
+    required: list[str] = field(default_factory=list)
+    exclude_names: list[str] = field(default_factory=list)
+    number: str | None = None
+    sa_required: bool = False
+    desc_sar: bool = False
+
+
+# 取引額の上位 14 枚のうち、ピカチュウex（版が未確定のため保留）を除いた 13 枚
+CARDS: list[CardRule] = [
+    CardRule("緑ミュウ RGB", ["ミュウ G RGB", "ミュウ G RGB"], floor_second=200_000,
+             required=["G/RGB"], exclude_names=["R/RGB", "B/RGB"]),
+    CardRule("赤ミュウ RGB", ["ミュウ R RGB", "ミュウ R RGB"], floor_second=275_000,
+             required=["R/RGB"], exclude_names=["G/RGB", "B/RGB"]),
+    CardRule("青ミュウ RGB", ["ミュウ B RGB", "ミュウ B RGB"], floor_second=210_000,
+             required=["B/RGB"], exclude_names=["G/RGB", "R/RGB"]),
+    CardRule("ブラッキーVMAX SA", ["ブラッキーVMAX SA", "ブラッキーVMAX"], floor=360_000,
+             number="095/069", sa_required=True),
+    CardRule("メガリザードンXex SAR", ["メガリザードンX SAR", "メガリザードンX"], floor=40_000,
+             number="110/080", desc_sar=True),
+    CardRule("レックウザVMAX SA", ["レックウザVMAX SA", "レックウザVMAX"], floor=300_000,
+             number="083/067", sa_required=True),
+    CardRule("メガリザードンYex MUR", ["メガリザードンY ex MUR", "メガリザードンY"], floor=90_000,
+             required=["MUR"]),
+    CardRule("ギラティナV SA", ["ギラティナV SA", "ギラティナV"], floor=96_000,
+             number="111/100", sa_required=True),
+    CardRule("ルギアV SA", ["ルギアV SA", "ルギアV"], floor=60_000,
+             number="110/098", sa_required=True),
+    CardRule("メガリザードンXex MUR", ["メガリザードンX MUR", "メガリザードンX"], floor=50_000,
+             number="116/080", required=["MUR"]),
+    CardRule("ミュウVMAX SA", ["ミュウVMAX SA", "ミュウVMAX"], floor=72_000,
+             number="119", sa_required=True),
+    CardRule("メガレックウザex MUR", ["メガレックウザ MUR", "メガレックウザ"], floor=25_000,
+             number="113/076", required=["MUR"]),
+    CardRule("ニンフィアVMAX SA", ["ニンフィアVMAX SA", "ニンフィアVMAX"], floor=76_000,
+             number="093/069", sa_required=True),
+    # ピカチュウex（スタートデッキ100）は版が決まるまで保留
+]
+
+# どのカードでも名前にあれば外す言葉（セット・スリーブ・PSA など、PayPay 版と同じ）
+GLOBAL_EXCLUDE_NAMES: list[str] = [
+    "スリーブ", "スリープ", "イラスト", "未開封", "BOX", "ボックス", "ディスプレイ", "フレーム",
+    "鑑賞用", "セット", "デッキパーツ", "PSA", "英語版", "韓国語版", "中国語版", "海外版",
+    "まとめ売り", "ジャンク", "2枚", "3枚", "4枚", "5枚", "10枚", "20枚", "5パック", "10パック",
+    "福袋", "構築済みデッキ", "デッキ", "旧裏", "おまけ", "オマケ", "2P", "3P", "4P", "5P",
+    "詰め合わせ", "ロット", "メモ帳", "ステッカー", "展示用", "特典", "ブレンダ", "プレイマット",
+    "コイン", "タオル", "VSTAR",
+]
+
+# 商品の説明文にこの言葉があれば外す（手描き・手書きのイラストカードを外すため）
+DESCRIPTION_EXCLUDE: tuple[str, ...] = ("手描き", "手書き")
+
+SA_RE = re.compile(r"(?<![A-Za-z])SA(?![A-Za-z])", re.IGNORECASE)
+SAR_RE = re.compile(r"(?<![A-Za-z])SAR(?![A-Za-z])", re.IGNORECASE)
+NUMBER_RE = re.compile(r"(\d{1,3})\s*/\s*(\d{1,3})")
+
+
+class PriceSortedMercapi(Mercapi):
+    """検索を「価格の安い順」にする（mercapi の標準は「おすすめ順」）。"""
+
+    def _search(self, search_request_data):
+        condition = search_request_data.data["searchCondition"]
+        condition["sort"] = "SORT_PRICE"
+        condition["order"] = "ORDER_ASC"
+        return super()._search(search_request_data)
 
 
 @dataclass
 class Listing:
     card: str
     price: int
+    name: str
     url: str
 
 
 # ---------------------------------------------------------------------------
-# 商品フィルタリング
+# 名前の判定
 # ---------------------------------------------------------------------------
 
+def squash(text: str) -> str:
+    """空白を取り、小文字にする（比較用）。"""
+    return re.sub(r"\s+", "", text).lower()
 
-def is_single_card(title: str) -> bool:
-    """タイトルからシングルカードかどうか判定する。
 
-    セット販売や複数枚販売、タイトル詐欺を除外する。
+def term_in_name(term: str, name: str) -> bool:
+    """語が商品名にあるか。
+
+    - 「G/RGB」は「G/RGB」「G RGB」の両方を同じとみなす（前後が英字の場合は別の語とみなす）。
+    - 英字だけの語（MUR, SA, BOX など）は、前後が英字でない場合だけ一致とみなす。
+    - それ以外は、空白を取って比べる。
     """
-    title_lower = title.lower()
-    return not any(keyword in title_lower for keyword in EXCLUDE_KEYWORDS)
+    if "/" in term:
+        left, right = term.split("/", 1)
+        pattern = rf"(?<![a-z]){re.escape(left.lower())}\s*/?\s*{re.escape(right.lower())}(?![a-z])"
+        return re.search(pattern, name.lower()) is not None
+    if re.fullmatch(r"[A-Za-z]+", term):
+        return re.search(rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])", name, re.IGNORECASE) is not None
+    return squash(term) in squash(name)
+
+
+def keyword_fragments_in_name(keyword: str, name: str) -> bool:
+    """検索語の言葉（空白で区切ったもの）が全部、商品名にあるか。"""
+    return all(squash(fragment) in squash(name) for fragment in keyword.split())
+
+
+def number_ok(name: str, target: str) -> bool:
+    """番号が書いてあるのに、目的の番号がない出品は外す。番号がない出品は残す。"""
+    found = NUMBER_RE.findall(name)
+    if not found:
+        return True
+    if "/" in target:
+        want_a, want_b = (int(x) for x in target.split("/", 1))
+        return any(int(a) == want_a and int(b) == want_b for a, b in found)
+    return any(int(a) == int(target) for a, _ in found)
+
+
+def name_passes(name: str, card: CardRule) -> bool:
+    """カードごとの名前の判定（除外語・必須語・SA・番号）。"""
+    if any(term_in_name(term, name) for term in GLOBAL_EXCLUDE_NAMES + card.exclude_names):
+        return False
+    if not all(term_in_name(term, name) for term in card.required):
+        return False
+    if card.sa_required and not SA_RE.search(name):
+        return False
+    if card.number and not number_ok(name, card.number):
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
 # メルカリ検索
 # ---------------------------------------------------------------------------
 
+def is_on_sale(item) -> bool:
+    return item.status == "ITEM_STATUS_ON_SALE"
 
-async def search_card(m: Mercapi, keyword: str) -> list[Listing]:
-    """1 カード分の検索結果を取得する。"""
+
+def is_auction(item) -> bool:
+    """オークション出品は外す（mercapi の結果に auction 情報があれば使う）。"""
+    auction = getattr(item, "auction", None)
+    return getattr(auction, "id_", None) is not None
+
+
+async def with_retry(label: str, func):
+    """一時的な失敗は MAX_RETRIES 回まで再試行する。"""
+    last_err: Exception | None = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            return await func()
+        except Exception as err:  # noqa: BLE001 - リトライ対象は広く取る
+            last_err = err
+            print(f"[retry {attempt}/{MAX_RETRIES}] {label}: {type(err).__name__}: {err}", file=sys.stderr)
+            if attempt < MAX_RETRIES:
+                await asyncio.sleep(RETRY_WAIT_SEC)
+    raise RuntimeError(f"{label} を {MAX_RETRIES} 回試行して取得失敗: {last_err}")
+
+
+async def search_window(m: PriceSortedMercapi, keyword: str, price_min: int):
+    """販売中・安い順・下限つきで 1 回検索する（1 ページ＝最大 120 件）。"""
+    kwargs = {"status": [SearchRequestData.Status.STATUS_ON_SALE]}
+    if price_min > 0:
+        kwargs["price_min"] = price_min
+    results = await m.search(keyword, **kwargs)
+    prices = [item.price for item in results.items]
+    if prices != sorted(prices):
+        print(f"警告: 価格順になっていません: {keyword} {prices[:10]}", file=sys.stderr)
+    return results.items
+
+
+async def scrape_card(m: PriceSortedMercapi, card: CardRule) -> list[Listing]:
+    """1 カード分の上位 TOP_N 件を取る。"""
+    windows = [
+        (card.keywords[0], card.floor, WINDOW1_LIMIT),
+        (card.keywords[-1], max(card.floor, card.floor_second), WINDOW2_LIMIT),
+    ]
+
+    # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
+    pool: dict[str, tuple[object, str, int]] = {}
+    for keyword, floor, limit in windows:
+        items = await with_retry(
+            f"{card.name} [{keyword}]",
+            lambda k=keyword, f=floor: search_window(m, k, f),
+        )
+        for item in items[:limit]:
+            pool.setdefault(item.id_, (item, keyword, floor))
+
     listings: list[Listing] = []
+    checked = 0
+    for item, keyword, floor in sorted(pool.values(), key=lambda t: t[0].price):
+        if len(listings) >= TOP_N or checked >= MAX_DETAIL_CHECKS:
+            break
+        if item.price < floor or not is_on_sale(item) or is_auction(item):
+            continue
+        if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card):
+            continue
 
-    try:
-        print(f"検索中: {keyword}", file=sys.stderr)
-        results = await m.search(keyword)
-        print(f"DEBUG: results.items count = {len(results.items)}, meta.num_found = {results.meta.num_found}", file=sys.stderr)
+        checked += 1
+        try:
+            detail = await m.item(item.id_)
+        except Exception as err:  # noqa: BLE001 - 1件の失敗で全体を止めない
+            print(f"[skip] 商品詳細の取得に失敗: {item.id_}: {err}", file=sys.stderr)
+            continue
+        if detail is None or not is_on_sale(detail):
+            print(f"[除外] 販売中でない: {item.id_}", file=sys.stderr)
+            continue
+        if detail.price < floor:
+            print(f"[除外] 下限未満: {detail.price} < {floor} {item.id_}", file=sys.stderr)
+            continue
 
-        for item in results.items:
-            if len(listings) >= TOP_N:
-                break
+        desc = detail.description or ""
+        if any(word in desc for word in DESCRIPTION_EXCLUDE):
+            print(f"[除外] 説明文に手描き・手書き: {item.id_}", file=sys.stderr)
+            continue
+        if card.desc_sar and not SAR_RE.search(detail.name) and not SAR_RE.search(desc):
+            print(f"[除外] 説明にSARがない: {item.id_}", file=sys.stderr)
+            continue
 
-            if not is_single_card(item.name):
-                print(f"除外: {item.name}", file=sys.stderr)
-                continue
-
-            try:
-                if item.status != "ITEM_STATUS_ON_SALE":
-                    print(f"除外: {item.name} (status={item.status})", file=sys.stderr)
-                    continue
-
-                if item.auction.id_ is not None:
-                    print(f"除外: {item.name} (オークション)", file=sys.stderr)
-                    continue
-
-                price = item.price
-                url = f"https://jp.mercari.com/item/{item.id_}"
-
-                if price is None or price <= 0:
-                    print(f"無効な価格: {item.name} ({price})", file=sys.stderr)
-                    continue
-
-                listings.append(Listing(card=keyword, price=price, url=url))
-                print(
-                    f"取得: {item.name} - ¥{price:,}",
-                    file=sys.stderr,
-                )
-
-            except Exception as e:
-                print(
-                    f"アイテム処理エラー ({keyword}): {type(e).__name__}: {e}",
-                    file=sys.stderr,
-                )
-                continue
-
-        print(f"完了: {keyword} ({len(listings)} 件)", file=sys.stderr)
-
-    except Exception as e:
-        print(
-            f"検索エラー ({keyword}): {type(e).__name__}: {e}",
-            file=sys.stderr,
+        listings.append(
+            Listing(
+                card=card.name,
+                price=detail.price,
+                name=detail.name,
+                url=f"https://jp.mercari.com/item/{detail.id_}",
+            )
         )
 
-    return listings
+    print(
+        f"[{card.name}] 候補 {len(pool)} 件 / 詳細確認 {checked} 件 / 合格 {len(listings)} 件",
+        file=sys.stderr,
+    )
+    return sorted(listings, key=lambda l: l.price)[:TOP_N]
 
 
 async def fetch_all() -> tuple[dict[str, list[Listing]], dict[str, str]]:
-    """全カードを並行して取得する。"""
+    """全カードを順に取得する（1 件ずつ、メルカリに負荷をかけないため）。"""
     results: dict[str, list[Listing]] = {}
     errors: dict[str, str] = {}
 
-    m = Mercapi()
-
-    try:
-        tasks = [search_card(m, keyword) for keyword in CARD_KEYWORDS]
-        search_results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        for keyword, result in zip(CARD_KEYWORDS, search_results):
-            if isinstance(result, Exception):
-                errors[keyword] = str(result)
-            else:
-                results[keyword] = result
-
-    except Exception as e:
-        print(f"fetch_all エラー: {type(e).__name__}: {e}", file=sys.stderr)
+    m = PriceSortedMercapi()
+    for card in CARDS:
+        try:
+            results[card.name] = await scrape_card(m, card)
+        except Exception as err:  # noqa: BLE001
+            errors[card.name] = f"{type(err).__name__}: {err}"
 
     return results, errors
 
@@ -194,7 +315,6 @@ async def fetch_all() -> tuple[dict[str, list[Listing]], dict[str, str]]:
 # ---------------------------------------------------------------------------
 # Discord 通知
 # ---------------------------------------------------------------------------
-
 
 def _now_jst() -> str:
     return datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
@@ -215,21 +335,23 @@ def _send(payload: dict) -> None:
 def post_report(results: dict[str, list[Listing]], errors: dict[str, str]) -> None:
     """カードごとに最安 TOP_N 件をまとめた Embed を 1 通送る。"""
     fields = []
-    for keyword in CARD_KEYWORDS:
-        listings = results.get(keyword, [])
+    for card in CARDS:
+        listings = results.get(card.name, [])
         if listings:
-            value = "\n".join(f"[{_fmt_price(l.price)}]({l.url})" for l in listings)
-        elif keyword in errors:
-            value = f"⚠️ 取得失敗: {errors[keyword][:200]}"
+            value = "\n".join(
+                f"No.{i} [{_fmt_price(l.price)}]({l.url})" for i, l in enumerate(listings, start=1)
+            )
+        elif card.name in errors:
+            value = f"⚠️ 取得失敗: {errors[card.name][:200]}"
         else:
-            value = "販売中の出品なし"
-        fields.append({"name": keyword, "value": value, "inline": False})
+            value = "該当なし"
+        fields.append({"name": card.name, "value": value, "inline": False})
 
     embed = {
-        "title": "メルカリ MEGA シリーズ 最安値レポート",
+        "title": "メルカリ カード 最安値レポート",
         "description": f"販売中・最安 {TOP_N} 件 / {_now_jst()}",
         "color": 0xE60012,
-        "fields": fields[:25],
+        "fields": fields[:25],  # Discord の Embed field 上限
         "footer": {"text": "6 時間ごと自動実行"},
     }
     _send({"embeds": [embed]})
@@ -249,7 +371,6 @@ def post_failure(title: str, detail: str) -> None:
 # エントリポイント
 # ---------------------------------------------------------------------------
 
-
 def main() -> int:
     if not DISCORD_WEBHOOK_URL:
         print("環境変数 DISCORD_WEBHOOK_URL が必要です", file=sys.stderr)
@@ -257,11 +378,12 @@ def main() -> int:
 
     try:
         results, errors = asyncio.run(fetch_all())
-    except Exception:
+    except Exception:  # noqa: BLE001 - 想定外はすべて Discord に流す
         post_failure("スクレイピング失敗", traceback.format_exc())
         return 1
 
-    if errors and len(errors) == len(CARD_KEYWORDS):
+    # 全カード失敗 = 実質的な失敗として扱う
+    if errors and len(errors) == len(CARDS):
         detail = "\n".join(f"- {k}: {v}" for k, v in errors.items())
         post_failure("スクレイピング失敗", detail)
         return 1
