@@ -76,7 +76,7 @@ CARDS: list[CardRule] = [
     CardRule("緑ミュウ RGB", ["ミュウ G RGB", "ミュウ G RGB"], floor_second=200_000,
              required=["G/RGB"], exclude_names=["R/RGB", "B/RGB"]),
     CardRule("赤ミュウ RGB", ["ミュウ R RGB", "ミュウ R RGB"], floor_second=275_000,
-             required=["R/RGB"], exclude_names=["G/RGB", "B/RGB"]),
+             required=["R/RGB"], exclude_names=["G/RGB", "B/RGB", "緑"]),
     CardRule("青ミュウ RGB", ["ミュウ B RGB", "ミュウ B RGB"], floor_second=210_000,
              required=["B/RGB"], exclude_names=["G/RGB", "R/RGB"]),
     CardRule("ブラッキーVMAX SA", ["ブラッキーVMAX SA", "ブラッキーVMAX"], floor=360_000,
@@ -107,7 +107,7 @@ GLOBAL_EXCLUDE_NAMES: list[str] = [
     "スリーブ", "スリープ", "イラスト", "未開封", "BOX", "ボックス", "ディスプレイ", "フレーム",
     "鑑賞用", "セット", "デッキパーツ", "PSA", "英語版", "韓国語版", "中国語版", "海外版",
     "まとめ売り", "ジャンク", "2枚", "3枚", "4枚", "5枚", "10枚", "20枚", "5パック", "10パック",
-    "福袋", "構築済みデッキ", "デッキ", "旧裏", "おまけ", "オマケ", "2P", "3P", "4P", "5P",
+    "中国版", "韓国版", "福袋", "構築済みデッキ", "デッキ", "旧裏", "おまけ", "オマケ", "2P", "3P", "4P", "5P",
     "詰め合わせ", "ロット", "メモ帳", "ステッカー", "展示用", "特典", "ブレンダ", "プレイマット",
     "コイン", "タオル", "VSTAR",
 ]
@@ -253,10 +253,9 @@ async def search_window(m: PagedMercapi, keyword: str, price_min: int) -> list:
 
 async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     """1 カード分の上位 TOP_N 件を取る。"""
-    windows = [
-        (card.keywords[0], card.floor),
-        (card.keywords[-1], max(card.floor, card.floor_second)),
-    ]
+    # 下限は両方の検索に付ける（ミュウは色ごとの下限を、1つ目の検索にも付ける）
+    floor = max(card.floor, card.floor_second)
+    windows = [(card.keywords[0], floor), (card.keywords[-1], floor)]
 
     # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
     pool: dict[str, tuple[object, str, int]] = {}
