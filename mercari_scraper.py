@@ -20,7 +20,9 @@ GitHub Actions から 6 時間ごとに実行される想定。
 from __future__ import annotations
 
 import asyncio
+import csv
 import os
+import pathlib
 import re
 import sys
 import traceback
@@ -386,6 +388,27 @@ def post_report(results: dict[str, list[Listing]], errors: dict[str, str]) -> No
     _send({"embeds": [embed]})
 
 
+RESULTS_CSV = pathlib.Path("results/mercari.csv")
+
+
+def write_csv(results: dict[str, list[Listing]], errors: dict[str, str]) -> None:
+    """結果を results/mercari.csv に書き出す（スプレッドシートの IMPORTDATA で読む）。"""
+    RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
+    now = _now_jst()
+    with RESULTS_CSV.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["カード", "順位", "価格", "URL", "更新"])
+        for card in CARDS:
+            listings = results.get(card.name, [])
+            if listings:
+                for rank, listing in enumerate(listings, start=1):
+                    writer.writerow([card.name, rank, listing.price, listing.url, now])
+            elif card.name in errors:
+                writer.writerow([card.name, "", "取得失敗", "", now])
+            else:
+                writer.writerow([card.name, "", "該当なし", "", now])
+
+
 def post_failure(title: str, detail: str) -> None:
     embed = {
         "title": title,
@@ -418,6 +441,7 @@ def main() -> int:
         return 1
 
     post_report(results, errors)
+    write_csv(results, errors)
 
     if errors:
         print(f"{len(errors)} 件のカードで取得失敗", file=sys.stderr)
