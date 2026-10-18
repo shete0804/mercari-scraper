@@ -145,6 +145,7 @@ class Listing:
     price: int
     name: str
     url: str
+    thumb: str = ""  # 出品の写真（先頭の1枚）
 
 
 # ---------------------------------------------------------------------------
@@ -310,12 +311,14 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
             print(f"[除外] 説明にSARがない: {item.id_}", file=sys.stderr)
             continue
 
+        thumbs = detail.thumbnails or item.thumbnails or []
         listings.append(
             Listing(
                 card=card.name,
                 price=detail.price,
                 name=detail.name,
                 url=f"https://jp.mercari.com/item/{detail.id_}",
+                thumb=thumbs[0] if thumbs else "",
             )
         )
 
@@ -397,16 +400,16 @@ def write_csv(results: dict[str, list[Listing]], errors: dict[str, str]) -> None
     now = _now_jst()
     with RESULTS_CSV.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["カード", "順位", "価格", "URL", "更新"])
+        writer.writerow(["カード", "順位", "価格", "URL", "更新", "写真"])
         for card in CARDS:
             listings = results.get(card.name, [])
             if listings:
                 for rank, listing in enumerate(listings, start=1):
-                    writer.writerow([card.name, rank, listing.price, listing.url, now])
+                    writer.writerow([card.name, rank, listing.price, listing.url, now, listing.thumb])
             elif card.name in errors:
-                writer.writerow([card.name, "", "取得失敗", "", now])
+                writer.writerow([card.name, "", "取得失敗", "", now, ""])
             else:
-                writer.writerow([card.name, "", "該当なし", "", now])
+                writer.writerow([card.name, "", "該当なし", "", now, ""])
 
 
 def post_failure(title: str, detail: str) -> None:
