@@ -39,11 +39,11 @@ from mercapi.requests import SearchRequestData
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
-TOP_N = 3
+TOP_N = 5
 MAX_RETRIES = 3
 RETRY_WAIT_SEC = 5
 MAX_PAGES = 10  # 検索結果を読むページ数（1ページ最大120件）。並び替えはできないので、読んだ中から安い順に選ぶ
-MAX_DETAIL_CHECKS = 8  # 商品詳細を開いて確かめる上限（カードごと）
+MAX_DETAIL_CHECKS = 12  # 商品詳細を開いて確かめる上限（カードごと）
 
 # 商品の状態：新品・未使用、未使用に近い、目立った傷や汚れなし、やや傷や汚れあり
 # （傷や汚れあり＝5、全体的に状態が悪い＝6 は外す）
