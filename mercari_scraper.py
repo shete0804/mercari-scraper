@@ -278,7 +278,7 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     """1 カード分の上位 TOP_N 件を取る。"""
     # 下限は両方の検索に付ける（ミュウは色ごとの下限を、1つ目の検索にも付ける）
     floor = max(card.floor, card.floor_second)
-    windows = [(card.keywords[0], floor), (card.keywords[-1], floor)]
+    windows = [(card.keywords[0], floor)]  # 1回の検索で十分（同じ語・同じ下限の2回目は重複のため外した）
 
     # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
     pool: dict[str, tuple[object, str, int]] = {}
