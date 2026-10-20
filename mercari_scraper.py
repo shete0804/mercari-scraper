@@ -211,6 +211,19 @@ def is_on_sale(item) -> bool:
     return item.status in ("ITEM_STATUS_ON_SALE", "on_sale")
 
 
+RECENT_DAYS = 30
+
+
+def is_recent(item) -> bool:
+    """最終更新日が直近 RECENT_DAYS 日以内か（古い出品は外す）。"""
+    updated = getattr(item, "updated", None)
+    if updated is None:
+        return False
+    if updated.tzinfo is None:
+        updated = updated.replace(tzinfo=timezone.utc)
+    return updated >= datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
+
+
 def is_auction(item) -> bool:
     """オークション出品は外す（mercapi の結果に auction 情報があれば使う）。"""
     auction = getattr(item, "auction", None)
@@ -282,7 +295,7 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     for item, keyword, floor in sorted(pool.values(), key=lambda t: t[0].price):
         if len(listings) >= TOP_N or checked >= MAX_DETAIL_CHECKS:
             break
-        if item.price < floor or not is_on_sale(item) or is_auction(item):
+        if item.price < floor or not is_on_sale(item) or is_auction(item) or not is_recent(item):
             continue
         if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card):
             continue
