@@ -12,4 +12,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: python sold_count_probe.py
+      - run: python list_search_fields.py
