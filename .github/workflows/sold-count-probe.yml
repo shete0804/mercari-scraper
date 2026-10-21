@@ -1,5 +1,7 @@
 name: Sold count probe
 on:
+  push:
+    branches: [test/sold-count-probe]
   workflow_dispatch:
 jobs:
   probe:
