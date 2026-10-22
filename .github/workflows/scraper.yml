@@ -3,7 +3,7 @@ name: Mercari Scraper
 on:
   schedule:
     # UTC 基準。 JST では 09:00 / 15:00 / 21:00 / 翌 03:00 に相当
-    - cron: '*/30 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
