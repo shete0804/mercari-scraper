@@ -177,6 +177,8 @@ GLOBAL_EXCLUDE_NAMES: list[str] = [
 DESCRIPTION_EXCLUDE: tuple[str, ...] = ("手描き", "手書き")
 
 SA_RE = re.compile(r"(?<![A-Za-z])SA(?![A-Za-z])", re.IGNORECASE)
+# SA か HR のどちらかの表記があれば合格（sa_required の判定に使う）
+SA_OR_HR_RE = re.compile(r"(?<![A-Za-z])(SA|HR)(?![A-Za-z])", re.IGNORECASE)
 SAR_RE = re.compile(r"(?<![A-Za-z])SAR(?![A-Za-z])", re.IGNORECASE)
 NUMBER_RE = re.compile(r"(\d{1,3})\s*/\s*(\d{1,3})")
 
@@ -250,7 +252,7 @@ def name_passes(name: str, card: CardRule) -> bool:
         return False
     if not all(term_in_name(term, name) for term in card.required):
         return False
-    if card.sa_required and not SA_RE.search(name):
+    if card.sa_required and not SA_OR_HR_RE.search(name):
         return False
     if card.number and not number_ok(name, card.number):
         return False
