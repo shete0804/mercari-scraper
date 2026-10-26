@@ -448,14 +448,17 @@ def post_report(results: dict[str, list[Listing]], errors: dict[str, str]) -> No
             value = "該当なし"
         fields.append({"name": card.name, "value": value, "inline": False})
 
-    embed = {
-        "title": "メルカリ カード 最安値レポート",
-        "description": f"販売中・最安 {TOP_N} 件 / {_now_jst()}",
-        "color": 0xE60012,
-        "fields": fields[:25],  # Discord の Embed field 上限
-        "footer": {"text": "6 時間ごと自動実行"},
-    }
-    _send({"embeds": [embed]})
+    # Discord は 1 通の文字数に上限（約 6000 字）があるため、4 枚ずつに分けて送る
+    chunk = 4
+    for start in range(0, len(fields), chunk):
+        embed = {
+            "title": "メルカリ カード 最安値レポート" + (f"（{start // chunk + 1}）" if len(fields) > chunk else ""),
+            "description": f"販売中・最安 {TOP_N} 件 / {_now_jst()}",
+            "color": 0xE60012,
+            "fields": fields[start:start + chunk],
+            "footer": {"text": "1 時間ごと自動実行（グループごと）"},
+        }
+        _send({"embeds": [embed]})
 
 
 RESULTS_CSV = pathlib.Path("results/mercari.csv")
@@ -517,8 +520,12 @@ def main() -> int:
         post_failure("スクレイピング失敗", detail)
         return 1
 
-    post_report(results, errors)
+    # CSV を先に書く（Discord の通知が失敗しても、結果は残す）
     write_csv(results, errors)
+    try:
+        post_report(results, errors)
+    except Exception:  # noqa: BLE001 - 通知の失敗で止めない
+        print("Discord への通知に失敗（CSV は書き出し済み）:\n" + traceback.format_exc(), file=sys.stderr)
 
     if errors:
         print(f"{len(errors)} 件のカードで取得失敗", file=sys.stderr)
