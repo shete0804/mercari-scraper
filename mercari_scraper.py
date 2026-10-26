@@ -256,7 +256,7 @@ def name_passes(name: str, card: CardRule) -> bool:
         return False
     if not all(term_in_name(term, name) for term in card.required):
         return False
-    if card.sa_required and not SA_OR_HR_RE.search(name):
+    if card.sa_required and not SA_RE.search(name):
         return False
     if card.number and not number_ok(name, card.number):
         return False
