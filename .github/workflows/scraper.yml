@@ -12,6 +12,10 @@ on:
         description: "動かすグループ（1 か 2）"
         required: false
         default: "1"
+      card:
+        description: "テスト：1枚だけ動かすときのカード名（空なら グループ全体）"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -39,6 +43,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           CARD_GROUP: ${{ inputs.group || (github.event.schedule == '20,50 * * * *' && '2' || '1') }}
+          CARD_ONLY: ${{ inputs.card }}
         run: python mercari_scraper.py
 
       - name: Commit results CSV

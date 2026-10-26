@@ -162,6 +162,10 @@ CARD_GROUP_NAMES: dict[str, list[str]] = {
 _card_group = os.environ.get("CARD_GROUP", "").strip()
 if _card_group in CARD_GROUP_NAMES:
     CARDS = [c for c in CARDS if c.name in CARD_GROUP_NAMES[_card_group]]
+# テスト用：環境変数 CARD_ONLY にカード名を入れると、そのカードだけ読む
+_card_only = os.environ.get("CARD_ONLY", "").strip()
+if _card_only:
+    CARDS = [c for c in CARDS if c.name == _card_only]
 
 # どのカードでも名前にあれば外す言葉（セット・スリーブ・PSA など、PayPay 版と同じ）
 GLOBAL_EXCLUDE_NAMES: list[str] = [
