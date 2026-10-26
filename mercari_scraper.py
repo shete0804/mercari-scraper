@@ -250,13 +250,14 @@ def number_ok(name: str, target: str) -> bool:
     return any(int(a) == int(target) for a, _ in found)
 
 
-def name_passes(name: str, card: CardRule) -> bool:
-    """カードごとの名前の判定（除外語・必須語・SA・番号）。"""
+def name_passes(name: str, card: CardRule, check_sa: bool = True) -> bool:
+    """カードごとの名前の判定（除外語・必須語・SA・番号）。
+    check_sa=False は「X HR」の検索で取れた出品（SA の表記を問わない）に使う。"""
     if any(term_in_name(term, name) for term in GLOBAL_EXCLUDE_NAMES + card.exclude_names):
         return False
     if not all(term_in_name(term, name) for term in card.required):
         return False
-    if card.sa_required and not SA_RE.search(name):
+    if check_sa and card.sa_required and not SA_RE.search(name):
         return False
     if card.number and not number_ok(name, card.number):
         return False
@@ -359,7 +360,9 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
             break
         if item.price < floor or not is_on_sale(item) or is_auction(item) or not is_recent(item):
             continue
-        if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card):
+        # 「X HR」の検索で取れた出品は、SA の表記を問わない（HR の検索語のときだけ SA の判定を外す）
+        is_hr_search = keyword.upper().endswith(" HR")
+        if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card, check_sa=not is_hr_search):
             continue
 
         checked += 1
