@@ -7,6 +7,11 @@ on:
     - cron: '5,35 * * * *'
     - cron: '20,50 * * * *'
   workflow_dispatch:
+    inputs:
+      group:
+        description: "動かすグループ（1 か 2）"
+        required: false
+        default: "1"
 
 permissions:
   contents: write
@@ -33,7 +38,7 @@ jobs:
       - name: Run scraper
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          CARD_GROUP: ${{ github.event.schedule == '20,50 * * * *' && '2' || '1' }}
+          CARD_GROUP: ${{ inputs.group || (github.event.schedule == '20,50 * * * *' && '2' || '1') }}
         run: python mercari_scraper.py
 
       - name: Commit results CSV

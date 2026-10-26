@@ -107,15 +107,16 @@ CARDS: list[CardRule] = [
              number="093/069", sa_required=True),
     CardRule("レッドのピカチュウ", ["レッドのピカチュウ", "レッドのピカチュウ"], floor=64000, number="270/SM-P"),
     CardRule("かんこうきゃく", ["かんこうきゃく", "かんこうきゃく"], floor=100000, number="192/173"),
-    CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000),
+    CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000, required=["227/S-P"]),
     CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX", "ピカチュウ&ゼクロムGX"], floor=216000, number="101/095"),
     CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX", "ブラッキー&ダークライGX"], floor=112000, number="182/173"),
-    CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000),
+    CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
     CardRule("ミュウex 347/190", ["ミュウex", "ミュウex"], floor=32000, number="347/190"),
     CardRule("ミュウex SAR 205/165", ["ミュウex SAR", "ミュウex"], floor=16000, number="205/165"),
-    CardRule("ゼクロムex", ["ゼクロムex", "ゼクロムex"], floor=32000, number="174/086"),
-    CardRule("レシラムex", ["レシラムex", "レシラムex"], floor=36000, number="174/086"),
-    CardRule("グレイシアVMAX", ["グレイシアVMAX", "グレイシアVMAX"], floor=56000, number="091/069"),
+    CardRule("ゼクロムex", ["ゼクロムex", "ゼクロムex"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
+    CardRule("レシラムex", ["レシラムex", "レシラムex"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
+    CardRule("グレイシアVMAX", ["グレイシアVMAX", "グレイシアVMAX"], floor=56000, number="091/069",
+             exclude_names=["ポルトガル", "フランス", "イタリア", "ドイツ", "スペイン"]),
     CardRule("ルチア", ["ルチア", "ルチア"], floor=104000, number="104/096"),
     CardRule("ピカチュウex 764/742", ["ピカチュウex", "ピカチュウex"], floor=44000, number="764/742"),
     CardRule("ビクティニ", ["ビクティニ", "ビクティニ"], floor=88000),
@@ -332,7 +333,8 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     """1 カード分の上位 TOP_N 件を取る。"""
     # 下限は両方の検索に付ける（ミュウは色ごとの下限を、1つ目の検索にも付ける）
     floor = max(card.floor, card.floor_second)
-    windows = [(card.keywords[0], floor)]  # 1回の検索で十分（同じ語・同じ下限の2回目は重複のため外した）
+    # 検索語が違うものは、すべて検索する（同じ語の重複だけ外す）
+    windows = [(kw, floor) for kw in dict.fromkeys(card.keywords)]
 
     # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
     pool: dict[str, tuple[object, str, int]] = {}
