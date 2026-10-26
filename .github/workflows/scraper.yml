@@ -48,6 +48,9 @@ jobs:
 
       - name: Commit results CSV
         if: always()
+        env:
+          CARD_GROUP: ${{ inputs.group || (github.event.schedule == '20,50 * * * *' && '2' || '1') }}
+          CARD_ONLY: ${{ inputs.card }}
         run: |
           [ -f results/mercari.csv ] || exit 0
           git config user.name "github-actions[bot]"
@@ -56,8 +59,27 @@ jobs:
           if git diff --cached --quiet; then
             echo "CSV に変更なし"
           else
-            git commit -m "chore: update Mercari results CSV [skip ci]"
-            git pull --rebase -q
-            git push
+            git commit -q -m "chore: update Mercari results CSV [skip ci]"
+            # 競合したら、相手の CSV を取り込み、このグループのカードの行だけ書き直して上げ直す（3回まで）
+            for attempt in 1 2 3; do
+              if git pull --rebase -q && git push -q; then
+                echo "CSV を反映しました"
+                exit 0
+              fi
+              echo "競合（試行 ${attempt}）: 相手の CSV を取り込み、このグループの行だけ書き直す"
+              git rebase --abort 2>/dev/null || true
+              cp results/mercari.csv /tmp/ours.csv
+              git fetch -q origin main
+              git reset -q --hard origin/main
+              python merge_mercari_csv.py /tmp/ours.csv results/mercari.csv
+              git add results/mercari.csv
+              if git diff --cached --quiet; then
+                echo "変更なし"
+                exit 0
+              fi
+              git commit -q -m "chore: update Mercari results CSV [skip ci]"
+            done
+            echo "CSV の反映に失敗しました"
+            exit 1
           fi
 

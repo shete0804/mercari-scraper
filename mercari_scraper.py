@@ -40,6 +40,8 @@ from mercapi.requests import SearchRequestData
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
 TOP_N = 5
+# この値を超える出品は、ダミーや桁の誤りとみなして外す（例：9,999,999 円）
+MAX_PRICE = 5_000_000
 MAX_RETRIES = 3
 RETRY_WAIT_SEC = 5
 MAX_PAGES = 10  # 検索結果を読むページ数（1ページ最大120件）。並び替えはできないので、読んだ中から安い順に選ぶ
@@ -75,6 +77,8 @@ class CardRule:
     number: str | None = None
     sa_required: bool = False
     desc_sar: bool = False
+    # SR の SA 版（SA の表記がない出品）を、カード番号で拾うための番号（例：101/095）
+    sa_numbers: list[str] = field(default_factory=list)
 
 
 # 取引額の上位 14 枚のうち、ピカチュウex（版が未確定のため保留）を除いた 13 枚
@@ -94,9 +98,9 @@ CARDS: list[CardRule] = [
     CardRule("メガリザードンYex MUR", ["メガリザードンY ex MUR", "メガリザードンY"], floor=90_000,
              required=["MUR"]),
     CardRule("ギラティナV SA", ["ギラティナV SA", "ギラティナV SR"], floor=96_000,
-             number="111/100", sa_required=True),
+             number="111/100", sa_required=True, sa_numbers=["111/100"]),
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR"], floor=60_000,
-             number="110/098", sa_required=True),
+             number="110/098", sa_required=True, sa_numbers=["110/098"]),
     CardRule("メガリザードンXex MUR", ["メガリザードンX MUR", "メガリザードンX"], floor=50_000,
              number="116/080", required=["MUR"]),
     CardRule("ミュウVMAX SA", ["ミュウVMAX SA", "ミュウVMAX HR"], floor=72_000,
@@ -108,8 +112,8 @@ CARDS: list[CardRule] = [
     CardRule("レッドのピカチュウ", ["レッドのピカチュウ", "レッドのピカチュウ"], floor=64000, number="270/SM-P"),
     CardRule("かんこうきゃく", ["かんこうきゃく", "かんこうきゃく"], floor=100000, number="192/173"),
     CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000, required=["227/S-P"]),
-    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=216000, number="101/095"),
-    CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173"),
+    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=216000, number="101/095", sa_numbers=["101/095"]),
+    CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
     CardRule("ミュウex 347/190", ["ミュウex", "ミュウex"], floor=32000, number="347/190"),
     CardRule("ミュウex SAR 205/165", ["ミュウex SAR", "ミュウex"], floor=16000, number="205/165"),
@@ -259,6 +263,9 @@ def name_passes(name: str, card: CardRule, check_sa: bool = True) -> bool:
         return False
     if card.number and not number_ok(name, card.number):
         return False
+    # SR 系の SA：SA の表記があるか、SA の番号が書いてある出品だけ残す（通常の SR を外す）
+    if check_sa and card.sa_numbers and not (SA_RE.search(name) or any(n in name for n in card.sa_numbers)):
+        return False
     return True
 
 
@@ -356,7 +363,7 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     for item, keyword, floor in sorted(pool.values(), key=lambda t: t[0].price):
         if len(listings) >= TOP_N or checked >= MAX_DETAIL_CHECKS:
             break
-        if item.price < floor or not is_on_sale(item) or is_auction(item) or not is_recent(item):
+        if item.price < floor or item.price > MAX_PRICE or not is_on_sale(item) or is_auction(item) or not is_recent(item):
             continue
         # 「X HR」の検索で取れた出品は、SA の表記を問わない（HR の検索語のときだけ SA の判定を外す）
         is_hr_search = keyword.upper().endswith(" HR")
