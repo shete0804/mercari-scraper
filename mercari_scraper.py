@@ -180,7 +180,7 @@ GLOBAL_EXCLUDE_NAMES: list[str] = [
 # 商品の説明文にこの言葉があれば外す（手描き・手書きのイラストカードを外すため）
 DESCRIPTION_EXCLUDE: tuple[str, ...] = ("手描き", "手書き")
 
-SA_RE = re.compile(r"(?<![A-Za-z])SA(?![A-Za-z])", re.IGNORECASE)
+SA_RE = re.compile(r"(?<![A-Za-z])SA(?![A-Za-z])|スペシャルアート", re.IGNORECASE)
 # SA か HR のどちらかの表記があれば合格（sa_required の判定に使う）
 SA_OR_HR_RE = re.compile(r"(?<![A-Za-z])(SA|HR)(?![A-Za-z])", re.IGNORECASE)
 SAR_RE = re.compile(r"(?<![A-Za-z])SAR(?![A-Za-z])", re.IGNORECASE)
