@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 メルカリ カード価格モニター（PayPayフリマ版と同じ 13 カード）
 ==========================================================
@@ -105,8 +105,62 @@ CARDS: list[CardRule] = [
              number="113/076", required=["MUR"]),
     CardRule("ニンフィアVMAX SA", ["ニンフィアVMAX SA", "ニンフィアVMAX"], floor=76_000,
              number="093/069", sa_required=True),
+    CardRule("レッドのピカチュウ", ["レッドのピカチュウ", "レッドのピカチュウ"], floor=64000, number="270/SM-P"),
+    CardRule("かんこうきゃく", ["かんこうきゃく", "かんこうきゃく"], floor=100000, number="192/173"),
+    CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000),
+    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX", "ピカチュウ&ゼクロムGX"], floor=216000, number="101/095"),
+    CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX", "ブラッキー&ダークライGX"], floor=112000, number="182/173"),
+    CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000),
+    CardRule("ミュウex 347/190", ["ミュウex", "ミュウex"], floor=32000, number="347/190"),
+    CardRule("ミュウex SAR 205/165", ["ミュウex SAR", "ミュウex"], floor=16000, number="205/165"),
+    CardRule("ゼクロムex", ["ゼクロムex", "ゼクロムex"], floor=32000, number="174/086"),
+    CardRule("レシラムex", ["レシラムex", "レシラムex"], floor=36000, number="174/086"),
+    CardRule("グレイシアVMAX", ["グレイシアVMAX", "グレイシアVMAX"], floor=56000, number="091/069"),
+    CardRule("ルチア", ["ルチア", "ルチア"], floor=104000, number="104/096"),
+    CardRule("ピカチュウex 764/742", ["ピカチュウex", "ピカチュウex"], floor=44000, number="764/742"),
+    CardRule("ビクティニ", ["ビクティニ", "ビクティニ"], floor=88000),
+    CardRule("レックウザV", ["レックウザV", "レックウザV"], floor=48000, number="076/067"),
+    CardRule("ピカチュウVMAX", ["ピカチュウVMAX", "ピカチュウVMAX"], floor=40000, number="114/100"),
+    CardRule("モクロー", ["モクロー", "モクロー"], floor=112000),
+    CardRule("ルザミーネ", ["ルザミーネ", "ルザミーネ"], floor=76000, number="055/050"),
+    CardRule("リザードンex SAR", ["リザードンex SAR", "リザードンex"], floor=28000, number="201/165"),
+    CardRule("リザードン 25th", ["リザードン", "リザードン"], floor=24000, number="001/025"),
+    CardRule("レックウザGX", ["レックウザGX", "レックウザGX"], floor=56000, number="240/150"),
+    CardRule("ミュウツーGX", ["ミュウツーGX", "ミュウツーGX"], floor=224000, number="082/072"),
+    CardRule("サナ", ["サナ", "サナ"], floor=104000, number="185/171"),
+    CardRule("ピカチュウ 175/XY-P", ["ピカチュウ", "ピカチュウ"], floor=240000),
+    CardRule("エリカのおもてなし", ["エリカのおもてなし", "エリカのおもてなし"], floor=44000, number="190/173"),
+    CardRule("こくばバドレックスVMAX", ["こくばバドレックスVMAX", "こくばバドレックスVMAX"], floor=40000, number="086/070"),
+    CardRule("バシャーモVMAX", ["バシャーモVMAX", "バシャーモVMAX"], floor=56000, number="086/070"),
+    CardRule("カイリューV", ["カイリューV", "カイリューV"], floor=36000, number="074/067"),
+    CardRule("ピカチュウ 061/SM-P", ["ピカチュウ", "ピカチュウ"], floor=200000),
+    CardRule("シロナ", ["シロナ", "シロナ"], floor=40000, number="070/066"),
+    CardRule("シロナのガブリアスex", ["シロナのガブリアスex", "シロナのガブリアスex"], floor=20000, number="087/063"),
+    CardRule("ナンジャモ SAR", ["ナンジャモ", "ナンジャモ"], floor=18000, number="096/071"),
+    CardRule("ブースターEX", ["ブースターEX", "ブースターEX"], floor=136000, number="007/032"),
+    CardRule("ブラッキーGX", ["ブラッキーGX", "ブラッキーGX"], floor=76000, number="229/150"),
+    CardRule("MサーナイトEX", ["MサーナイトEX", "MサーナイトEX"], floor=60000, number="020/032"),
+    CardRule("バンギラスV SA", ["バンギラスV SA", "バンギラスV"], floor=20000, number="077/070"),
     # ピカチュウex（スタートデッキ100）は版が決まるまで保留
 ]
+
+# 2 グループに分けて、GitHub で 1 時間に 4 回動かす（PayPay の target_g1 / target_g2 と同じ分け方）
+# 環境変数 CARD_GROUP が "1" か "2" のときは、そのグループのカードだけ読む（空なら全部）
+CARD_GROUP_NAMES: dict[str, list[str]] = {
+    "1": ["緑ミュウ RGB", "赤ミュウ RGB", "青ミュウ RGB", "ブラッキーVMAX SA", "メガリザードンXex SAR",
+          "レックウザVMAX SA", "メガリザードンYex MUR", "ギラティナV SA", "ルギアV SA", "メガリザードンXex MUR",
+          "ミュウVMAX SA", "メガレックウザex MUR", "ニンフィアVMAX SA", "レッドのピカチュウ", "かんこうきゃく",
+          "ピカチュウ 227/S-P", "ピカチュウ&ゼクロムGX", "ブラッキー&ダークライGX", "イーブイ", "ミュウex 347/190",
+          "ミュウex SAR 205/165", "ゼクロムex", "レシラムex", "グレイシアVMAX"],
+    "2": ["ルチア", "ピカチュウex 764/742", "ビクティニ", "レックウザV", "ピカチュウVMAX", "モクロー", "ルザミーネ",
+          "リザードンex SAR", "リザードン 25th", "レックウザGX", "ミュウツーGX", "サナ", "ピカチュウ 175/XY-P",
+          "エリカのおもてなし", "こくばバドレックスVMAX", "バシャーモVMAX", "カイリューV", "ピカチュウ 061/SM-P",
+          "シロナ", "シロナのガブリアスex", "ナンジャモ SAR", "ブースターEX", "ブラッキーGX", "MサーナイトEX",
+          "バンギラスV SA"],
+}
+_card_group = os.environ.get("CARD_GROUP", "").strip()
+if _card_group in CARD_GROUP_NAMES:
+    CARDS = [c for c in CARDS if c.name in CARD_GROUP_NAMES[_card_group]]
 
 # どのカードでも名前にあれば外す言葉（セット・スリーブ・PSA など、PayPay 版と同じ）
 GLOBAL_EXCLUDE_NAMES: list[str] = [
@@ -411,9 +465,16 @@ def write_csv(results: dict[str, list[Listing]], errors: dict[str, str]) -> None
     """結果を results/mercari.csv に書き出す（スプレッドシートの IMPORTDATA で読む）。"""
     RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
     now = _now_jst()
+    # 今回読んだカード以外の行は、前回のまま残す（グループごとに動くため）
+    names = {card.name for card in CARDS}
+    kept: list[list[str]] = []
+    if RESULTS_CSV.exists():
+        with RESULTS_CSV.open(newline="", encoding="utf-8") as f:
+            kept = [row for row in list(csv.reader(f))[1:] if row and row[0] not in names]
     with RESULTS_CSV.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["カード", "順位", "価格", "URL", "更新", "写真"])
+        writer.writerows(kept)
         for card in CARDS:
             listings = results.get(card.name, [])
             if listings:

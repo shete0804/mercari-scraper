@@ -1,9 +1,11 @@
-name: Mercari Scraper
+﻿name: Mercari Scraper
 
 on:
   schedule:
     # UTC 基準。 JST では 09:00 / 15:00 / 21:00 / 翌 03:00 に相当
-    - cron: '3,18,33,48 * * * *'
+    # グループ1（5分と35分）と グループ2（20分と50分）。PayPay と同じ時刻
+    - cron: '5,35 * * * *'
+    - cron: '20,50 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -12,7 +14,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -31,6 +33,7 @@ jobs:
       - name: Run scraper
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          CARD_GROUP: ${{ github.event.schedule == '20,50 * * * *' && '2' || '1' }}
         run: python mercari_scraper.py
 
       - name: Commit results CSV
@@ -47,3 +50,4 @@ jobs:
             git pull --rebase -q
             git push
           fi
+
