@@ -77,6 +77,7 @@ class CardRule:
     number: str | None = None
     sa_required: bool = False
     desc_sar: bool = False
+    desc_exclude: list[str] = field(default_factory=list)
     # SR の SA 版（SA の表記がない出品）を、カード番号で拾うための番号（例：101/095）
     sa_numbers: list[str] = field(default_factory=list)
 
@@ -115,7 +116,7 @@ CARDS: list[CardRule] = [
     CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=216000, number="101/095", sa_numbers=["101/095"]),
     CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
-    CardRule("ミュウex 347/190", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR"], floor=32000, number="347/190", exclude_names=["151"]),
+    CardRule("ミュウex 347/190", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR"], floor=32000, number="347/190", exclude_names=["151"], desc_exclude=["151", "205/165"]),
     CardRule("ゼクロムex", ["ゼクロムex BWR", "ゼクロムex BWR"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
     CardRule("レシラムex", ["レシラムex BWR", "レシラムex BWR"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
     CardRule("グレイシアVMAX", ["グレイシアVMAX SA", "グレイシアVMAX HR"], floor=56000, number="091/069",
@@ -388,6 +389,9 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
         desc = detail.description or ""
         if any(word in desc for word in DESCRIPTION_EXCLUDE):
             print(f"[除外] 説明文に手描き・手書き: {item.id_}", file=sys.stderr)
+            continue
+        if any(term in desc or term in detail.name for term in card.desc_exclude):
+            print(f"[除外] 説明文に別の版の語: {item.id_}", file=sys.stderr)
             continue
         if card.desc_sar and not SAR_RE.search(detail.name) and not SAR_RE.search(desc):
             print(f"[除外] 説明にSARがない: {item.id_}", file=sys.stderr)
