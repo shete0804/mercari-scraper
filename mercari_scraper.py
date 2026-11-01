@@ -129,7 +129,7 @@ CARDS: list[CardRule] = [
     CardRule("モクロー", ["モクロー", "モクロー"], floor=112000),
     CardRule("ルザミーネ", ["ルザミーネ SR", "ルザミーネ SR"], floor=76000, number="055/050"),
     CardRule("リザードンex SAR", ["リザードンex SAR", "リザードンex"], floor=28000, number="201/165", exclude_names=["PROMO", "1stEdition", "シャイニ", "黒炎", "ハイクラス", "XY", "BREAK"]),
-    CardRule("リザードン 25th", ["リザードン", "リザードン"], floor=24000, number="001/025", exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
+    CardRule("リザードン 25th", ["リザードン", "リザードン"], floor=24000, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
     CardRule("レックウザGX", ["レックウザGX SSR", "レックウザGX SSR"], floor=56000, number="240/150"),
     CardRule("ミュウツーGX", ["ミュウツーGX SR", "ミュウツーGX SR"], floor=224000, number="082/072"),
     CardRule("サナ", ["サナ SR", "サナ SR"], floor=104000, number="185/171"),
