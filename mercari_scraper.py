@@ -142,7 +142,7 @@ CARDS: list[CardRule] = [
     CardRule("シロナ", ["シロナ SR", "シロナ SR"], floor=40000, number="070/066"),
     CardRule("シロナのガブリアスex", ["シロナのガブリアスex SAR", "シロナのガブリアスex SAR"], floor=20000, number="087/063"),
     CardRule("ナンジャモ SAR", ["ナンジャモ", "ナンジャモ"], floor=18000, number="096/071"),
-    CardRule("ブースターEX", ["ブースターEX RR CP3", "ブースターEX RR"], floor=30400, required=["CP3"], exclude_names=["XY", "BREAK"], number="007/032"),
+    CardRule("ブースターEX", ["ブースターEX RR 007/032", "ブースターEX ポケキュンコレクション 007/032"], floor=30400, exclude_names=["XY", "BREAK"], number="007/032"),
     CardRule("ブラッキーGX", ["ブラッキーGX SSR", "ブラッキーGX SSR"], floor=76000, number="229/150"),
     CardRule("MサーナイトEX", ["MサーナイトEX RR", "MサーナイトEX RR"], floor=60000, number="020/032"),
     CardRule("バンギラスV SA", ["バンギラスV SA", "バンギラスV"], floor=20000, number="077/070"),
