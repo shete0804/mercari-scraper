@@ -126,7 +126,7 @@ CARDS: list[CardRule] = [
     CardRule("ビクティニ", ["ビクティニ", "ビクティニ"], floor=88000),
     CardRule("レックウザV", ["レックウザV SR", "レックウザV SR"], floor=48000, number="076/067"),
     CardRule("ピカチュウVMAX", ["ピカチュウVMAX HR", "ピカチュウVMAX HR"], floor=40000, number="114/100"),
-    CardRule("モクロー", ["モクロー", "モクロー"], floor=112000),
+    CardRule("モクロー ムンク", ["モクロー 290/SM-P"], floor=112000, number="290/SM-P"),
     CardRule("ルザミーネ", ["ルザミーネ SR", "ルザミーネ SR"], floor=76000, number="055/050"),
     CardRule("リザードンex SAR", ["リザードンex SAR", "リザードンex"], floor=28000, number="201/165", exclude_names=["PROMO", "1stEdition", "シャイニ", "黒炎", "ハイクラス", "XY", "BREAK"]),
     CardRule("リザードン 25th", ["リザードン", "リザードン"], floor=24000, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
