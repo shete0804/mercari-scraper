@@ -98,7 +98,7 @@ CARDS: list[CardRule] = [
              number="083/067", sa_required=True),
     CardRule("メガリザードンYex MUR", ["メガリザードンY ex MUR", "メガリザードンY"], floor=90_000,
              required=["MUR"]),
-    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA", "ギラティナV SR"], floor=96_000,
+    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR"], floor=96_000,
              number="111/100", sa_required=True, sa_numbers=["111/100"]),
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR"], floor=60_000,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
@@ -152,9 +152,9 @@ CARDS: list[CardRule] = [
 # 2 グループに分けて、GitHub で 1 時間に 4 回動かす（PayPay の target_g1 / target_g2 と同じ分け方）
 # 環境変数 CARD_GROUP が "1" か "2" のときは、そのグループのカードだけ読む（空なら全部）
 CARD_GROUP_NAMES: dict[str, list[str]] = {
-    "1": ["緑ミュウ RGB", "赤ミュウ RGB", "青ミュウ RGB", "ブラッキーVMAX SA", "メガリザードンXex SAR",
-          "レックウザVMAX SA", "メガリザードンYex MUR", "ギラティナV SA", "ルギアV SA", "メガリザードンXex MUR",
-          "ミュウVMAX SA", "メガレックウザex MUR", "ニンフィアVMAX SA", "レッドのピカチュウ", "かんこうきゃく",
+    "1": ["緑ミュウ RGB", "赤ミュウ RGB", "青ミュウ RGB", "ブラッキーVMAX SA", "メガリザードンXex SAR インフェルノX",
+          "レックウザVMAX SA", "メガリザードンYex MUR", "ギラティナV SA ロストアビス", "ルギアV SA", "メガリザードンXex MUR",
+          "ミュウVMAX SA", "メガレックウザex MUR ストームエメラルダ", "ニンフィアVMAX SA", "レッドのピカチュウ", "かんこうきゃく",
           "ピカチュウ 227/S-P", "ピカチュウ&ゼクロムGX", "ブラッキー&ダークライGX", "イーブイ ムンク", "ミュウex 347/190",
           "ゼクロムex", "レシラムex", "グレイシアVMAX"],
     "2": ["ルチア", "ピカチュウex 764/742", "ビクティニ", "レックウザV", "ピカチュウVMAX", "モクロー ムンク", "ルザミーネ",
