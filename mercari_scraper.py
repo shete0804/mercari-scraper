@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 メルカリ カード価格モニター（PayPayフリマ版と同じ 13 カード）
 ==========================================================
@@ -115,7 +115,7 @@ CARDS: list[CardRule] = [
     CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000, required=["227/S-P"]),
     CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=216000, number="101/095", sa_numbers=["101/095"]),
     CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
-    CardRule("イーブイ", ["イーブイ", "イーブイ"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
+    CardRule("イーブイ ムンク", ["イーブイ ムンク"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
     CardRule("ミュウex 347/190", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR", "ミュウ ex SAR 347/190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
     CardRule("ゼクロムex", ["ゼクロムex BWR", "ゼクロムex BWR"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
     CardRule("レシラムex", ["レシラムex BWR", "レシラムex BWR"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
