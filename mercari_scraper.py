@@ -136,7 +136,7 @@ CARDS: list[CardRule] = [
     CardRule("ピカチュウ 175/XY-P", ["ピカチュウ バトルフェスタ2015", "ピカチュウ 175/XY-P"], floor=240000, required=["175/XY-P"]),
     CardRule("エリカのおもてなし", ["エリカのおもてなし SR", "エリカのおもてなし SR"], floor=44000, number="190/173"),
     CardRule("こくばバドレックスVMAX", ["こくばバドレックスVMAX HR", "こくばバドレックスVMAX HR"], floor=40000, number="086/070"),
-    CardRule("バシャーモVMAX", ["バシャーモVMAX HR", "バシャーモVMAX HR"], floor=56000, number="086/070"),
+    CardRule("バシャーモVMAX", ["バシャーモVMAX SA", "バシャーモVMAX HR"], floor=56000, number="086/070"),
     CardRule("カイリューV", ["カイリューV SR", "カイリューV SR"], floor=36000, number="074/067"),
     CardRule("ピカチュウ 061/SM-P", ["ピカチュウ 061/SM-P", "ピカチュウ ポケモンカードフェスタ2017"], floor=200000, required=["061/SM-P"]),
     CardRule("シロナ", ["シロナ SR", "シロナ SR"], floor=40000, number="070/066"),
