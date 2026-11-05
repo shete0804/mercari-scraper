@@ -113,7 +113,7 @@ CARDS: list[CardRule] = [
     CardRule("レッドのピカチュウ", ["レッドのピカチュウ", "レッドのピカチュウ"], floor=64000, number="270/SM-P"),
     CardRule("かんこうきゃく", ["かんこうきゃく SR", "かんこうきゃく SR"], floor=100000, number="192/173"),
     CardRule("ピカチュウ 227/S-P", ["ピカチュウ", "ピカチュウ"], floor=160000, required=["227/S-P"]),
-    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=216000, number="101/095", sa_numbers=["101/095"]),
+    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=80000, sa_numbers=["101/095"]),
     CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ ムンク", ["イーブイ ムンク"], floor=160000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
     CardRule("ミュウex 347/190", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR", "ミュウ ex SAR 347/190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
@@ -218,8 +218,8 @@ class Listing:
 # ---------------------------------------------------------------------------
 
 def squash(text: str) -> str:
-    """空白を取り、小文字にする（比較用）。"""
-    return re.sub(r"\s+", "", text).lower()
+    """空白を取り、小文字にする（比較用）。全角の＆は半角の & とみなす。"""
+    return re.sub(r"\s+", "", text.replace("＆", "&")).lower()
 
 
 def term_in_name(term: str, name: str) -> bool:
