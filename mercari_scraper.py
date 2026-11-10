@@ -45,7 +45,7 @@ MAX_PRICE = 5_000_000
 MAX_RETRIES = 3
 RETRY_WAIT_SEC = 5
 MAX_PAGES = 10  # 検索結果を読むページ数（1ページ最大120件）。並び替えはできないので、読んだ中から安い順に選ぶ
-MAX_DETAIL_CHECKS = 12  # 商品詳細を開いて確かめる上限（カードごと）
+MAX_DETAIL_CHECKS = 20  # 商品詳細を開いて確かめる上限（カードごと）。店舗の出品（ID が m で始まらない）は数えない
 
 # 商品の状態：新品・未使用、未使用に近い、目立った傷や汚れなし、やや傷や汚れあり
 # （傷や汚れあり＝5、全体的に状態が悪い＝6 は外す）
@@ -372,6 +372,11 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
         # 「X HR」の検索で取れた出品は、SA の表記を問わない（HR の検索語のときだけ SA の判定を外す）
         is_hr_search = keyword.upper().endswith(" HR")
         if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card, check_sa=not is_hr_search):
+            continue
+
+        # 店舗の出品（ID が m で始まらない）は、商品詳細の API で取れないので、確かめずに外す（上限を使わない）
+        if not item.id_.startswith("m"):
+            print(f"[除外] 店舗の出品（詳細を取れない）: {item.id_}", file=sys.stderr)
             continue
 
         checked += 1
