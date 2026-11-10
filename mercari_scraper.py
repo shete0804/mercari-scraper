@@ -148,7 +148,7 @@ CARDS: list[CardRule] = [
     CardRule("バンギラスV SA", ["バンギラスV SA", "バンギラスV"], floor=20000, number="077/070"),
     # ピカチュウex（スタートデッキ100）：PayPay と同じ検索語・除外（006/023 の版は外す）
     CardRule("ピカチュウex スタートデッキ100", ["ピカチュウex スタートデッキ100", "ピカチュウex 006 023 スタートデッキ100"],
-             exclude_names=["006/023", "006/", "/023"]),
+             floor=48000, exclude_names=["006/023", "006/", "/023"]),
 ]
 
 # 2 グループに分けて、GitHub で 1 時間に 4 回動かす（PayPay の target_g1 / target_g2 と同じ分け方）
