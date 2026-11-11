@@ -374,9 +374,23 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
         if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card, check_sa=not is_hr_search):
             continue
 
-        # 店舗の出品（ID が m で始まらない）は、商品詳細の API で取れないので、確かめずに外す（上限を使わない）
+        # 店舗の出品（ID が m で始まらない）：商品詳細の API では取れない。
+        # 検索の結果（値段・名前・販売中・状態の条件）だけで判定する。説明文を見ないと決まらない版（SAR の確認）は対象外。
         if not item.id_.startswith("m"):
-            print(f"[除外] 店舗の出品（詳細を取れない）: {item.id_}", file=sys.stderr)
+            if card.desc_sar:
+                print(f"[除外] 店舗の出品（説明文の確認が必要）: {item.id_}", file=sys.stderr)
+                continue
+            thumbs_s = item.thumbnails or []
+            listings.append(
+                Listing(
+                    card=card.name,
+                    price=item.price,
+                    name=item.name,
+                    url=f"https://jp.mercari.com/shops/product/{item.id_}",
+                    thumb=thumbs_s[0] if thumbs_s else "",
+                )
+            )
+            print(f"[店舗] {card.name} ¥{item.price} {item.id_}", file=sys.stderr)
             continue
 
         checked += 1
