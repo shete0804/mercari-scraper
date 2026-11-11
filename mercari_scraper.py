@@ -84,67 +84,67 @@ class CardRule:
 
 # 取引額の上位 14 枚のうち、ピカチュウex（版が未確定のため保留）を除いた 13 枚
 CARDS: list[CardRule] = [
-    CardRule("緑ミュウ RGB", ["ミュウ G RGB"], floor_second=200_000,
+    CardRule("ミュウ G RGB", ["ミュウ G RGB"], floor_second=200_000,
              required=["G/RGB"], exclude_names=["R/RGB", "B/RGB"]),
-    CardRule("赤ミュウ RGB", ["ミュウ R RGB"], floor_second=275_000,
+    CardRule("ミュウ R RGB", ["ミュウ R RGB"], floor_second=275_000,
              required=["R/RGB"], exclude_names=["G/RGB", "B/RGB", "緑"]),
-    CardRule("青ミュウ RGB", ["ミュウ B RGB"], floor_second=210_000,
+    CardRule("ミュウ B RGB", ["ミュウ B RGB"], floor_second=210_000,
              required=["B/RGB"], exclude_names=["G/RGB", "R/RGB"]),
     CardRule("ブラッキーVMAX SA", ["ブラッキーVMAX SA", "ブラッキーVMAX HR"], floor=225_000,
              number="095/069", sa_required=True),
-    CardRule("メガリザードンXex SAR インフェルノX", ["メガリザードンX SAR", "メガリザードンX"], floor=25_000,
+    CardRule("メガリザードンX SAR", ["メガリザードンX SAR", "メガリザードンX"], floor=25_000,
              number="110/080", desc_sar=True),
     CardRule("レックウザVMAX SA", ["レックウザVMAX SA", "レックウザVMAX HR"], floor=300_000,
              number="083/067", sa_required=True),
-    CardRule("メガリザードンYex MUR", ["メガリザードンY ex MUR", "メガリザードンY"], floor=90_000,
+    CardRule("メガリザードンY ex MUR", ["メガリザードンY ex MUR", "メガリザードンY"], floor=90_000,
              required=["MUR"]),
     CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR"], floor=60_000,
              number="111/100", sa_required=True, sa_numbers=["111/100"]),
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR"], floor=37_500,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
-    CardRule("メガリザードンXex MUR", ["メガリザードンX MUR", "メガリザードンX"], floor=50_000,
+    CardRule("メガリザードンX MUR", ["メガリザードンX MUR", "メガリザードンX"], floor=50_000,
              number="116/080", required=["MUR"]),
     CardRule("ミュウVMAX SA", ["ミュウVMAX SA", "ミュウVMAX HR"], floor=45_000,
              number="119", sa_required=True),
-    CardRule("メガレックウザex MUR ストームエメラルダ", ["メガレックウザ MUR", "メガレックウザ"], floor=25_000,
+    CardRule("メガレックウザ MUR", ["メガレックウザ MUR", "メガレックウザ"], floor=25_000,
              number="113/076", required=["MUR"]),
     CardRule("ニンフィアVMAX SA", ["ニンフィアVMAX SA", "ニンフィアVMAX HR"], floor=47_500,
              number="093/069", sa_required=True),
     CardRule("レッドのピカチュウ", ["レッドのピカチュウ"], floor=23200, number="270/SM-P"),
-    CardRule("かんこうきゃく", ["かんこうきゃく SR"], floor=40000, number="192/173"),
-    CardRule("ピカチュウ 227/S-P", ["ピカチュウ 見返り美人", "ピカチュウ 227/S-P"], floor=160000, required=["227/S-P"]),
-    CardRule("ピカチュウ&ゼクロムGX", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=80000, sa_numbers=["101/095"]),
-    CardRule("ブラッキー&ダークライGX", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
+    CardRule("かんこうきゃく SR", ["かんこうきゃく SR"], floor=40000, number="192/173"),
+    CardRule("ピカチュウ 見返り美人", ["ピカチュウ 見返り美人", "ピカチュウ 見返り美人"], floor=160000, required=["227/S-P"]),
+    CardRule("ピカチュウ&ゼクロムGX SA", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR"], floor=80000, sa_numbers=["101/095"]),
+    CardRule("ブラッキー&ダークライGX SA", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR"], floor=112000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ ムンク", ["イーブイ ムンク"], floor=100000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"]),
-    CardRule("ミュウex 347/190", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR", "ミュウ ex SAR 347/190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
-    CardRule("ゼクロムex", ["ゼクロムex BWR"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
-    CardRule("レシラムex", ["レシラムex BWR"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
-    CardRule("グレイシアVMAX", ["グレイシアVMAX SA", "グレイシアVMAX HR"], floor=56000, number="091/069",
+    CardRule("ミュウex SAR シャイニートレジャーex", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR", "ミュウ ex SAR 347/190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
+    CardRule("ゼクロムex BWR", ["ゼクロムex BWR"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
+    CardRule("レシラムex BWR", ["レシラムex BWR"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
+    CardRule("グレイシアVMAX SA", ["グレイシアVMAX SA", "グレイシアVMAX HR"], floor=56000, number="091/069",
              exclude_names=["ポルトガル", "フランス", "イタリア", "ドイツ", "スペイン"]),
-    CardRule("ルチア", ["ルチア SR"], floor=46400, number="104/096"),
-    CardRule("ピカチュウex 764/742", ["ピカチュウex SAR"], floor=44000, number="764/742", exclude_names=["30th", "MEGA", "ハイクラス"]),
+    CardRule("ルチア SR", ["ルチア SR"], floor=46400, number="104/096"),
+    CardRule("ピカチュウex SAR", ["ピカチュウex SAR"], floor=44000, number="764/742", exclude_names=["30th", "MEGA", "ハイクラス"]),
     CardRule("ビクティニ", ["ビクティニ"], floor=88000),
-    CardRule("レックウザV", ["レックウザV SR"], floor=48000, number="076/067"),
-    CardRule("ピカチュウVMAX", ["ピカチュウVMAX HR"], floor=29600, number="114/100"),
-    CardRule("モクロー ムンク", ["モクロー 290/SM-P"], floor=16000, number="290/SM-P"),
-    CardRule("ルザミーネ", ["ルザミーネ SR"], floor=70080, number="055/050"),
+    CardRule("レックウザV SR", ["レックウザV SR"], floor=48000, number="076/067"),
+    CardRule("ピカチュウVMAX HR", ["ピカチュウVMAX HR"], floor=29600, number="114/100"),
+    CardRule("モクロー 290/SM-P", ["モクロー 290/SM-P"], floor=16000, number="290/SM-P"),
+    CardRule("ルザミーネ SR", ["ルザミーネ SR"], floor=70080, number="055/050"),
     CardRule("リザードンex SAR", ["リザードンex SAR", "リザードンex"], floor=28000, number="201/165", exclude_names=["PROMO", "1stEdition", "シャイニ", "黒炎", "ハイクラス", "XY", "BREAK"]),
-    CardRule("リザードン 25th", ["リザードン"], floor=22400, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
-    CardRule("レックウザGX", ["レックウザGX SSR"], floor=24800, number="240/150"),
-    CardRule("ミュウツーGX", ["ミュウツーGX SR"], floor=84800, number="082/072"),
-    CardRule("サナ", ["サナ SR"], floor=46240, number="185/171"),
-    CardRule("ピカチュウ 175/XY-P", ["ピカチュウ バトルフェスタ2015", "ピカチュウ 175/XY-P"], floor=80000, required=["175/XY-P"]),
-    CardRule("エリカのおもてなし", ["エリカのおもてなし SR"], floor=31520, number="190/173"),
-    CardRule("こくばバドレックスVMAX", ["こくばバドレックスVMAX HR"], floor=40000, number="086/070"),
-    CardRule("バシャーモVMAX", ["バシャーモVMAX SA", "バシャーモVMAX HR"], floor=56000, number="086/070"),
-    CardRule("カイリューV", ["カイリューV SR"], floor=36000, number="074/067"),
+    CardRule("リザードン", ["リザードン"], floor=22400, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
+    CardRule("レックウザGX SSR", ["レックウザGX SSR"], floor=24800, number="240/150"),
+    CardRule("ミュウツーGX SR", ["ミュウツーGX SR"], floor=84800, number="082/072"),
+    CardRule("サナ SR", ["サナ SR"], floor=46240, number="185/171"),
+    CardRule("ピカチュウ バトルフェスタ2015", ["ピカチュウ バトルフェスタ2015", "ピカチュウ バトルフェスタ2015"], floor=80000, required=["175/XY-P"]),
+    CardRule("エリカのおもてなし SR", ["エリカのおもてなし SR"], floor=31520, number="190/173"),
+    CardRule("こくばバドレックスVMAX HR", ["こくばバドレックスVMAX HR"], floor=40000, number="086/070"),
+    CardRule("バシャーモVMAX SA", ["バシャーモVMAX SA", "バシャーモVMAX HR"], floor=56000, number="086/070"),
+    CardRule("カイリューV SR", ["カイリューV SR"], floor=36000, number="074/067"),
     CardRule("ピカチュウ 061/SM-P", ["ピカチュウ 061/SM-P", "ピカチュウ ポケモンカードフェスタ2017"], floor=132000, required=["フェスタ2017"], exclude_names=["夏フェスタ"]),
-    CardRule("シロナ", ["シロナ SR"], floor=22400, number="070/066"),
-    CardRule("シロナのガブリアスex", ["シロナのガブリアスex SAR"], floor=20000, number="087/063"),
-    CardRule("ナンジャモ SAR", ["ナンジャモ"], floor=18000, number="096/071"),
-    CardRule("ブースターEX", ["ブースターEX RR 007/032", "ブースターEX ポケキュンコレクション 007/032"], floor=30400, exclude_names=["XY", "BREAK"], number="007/032"),
-    CardRule("ブラッキーGX", ["ブラッキーGX SSR"], floor=28000, number="229/150"),
-    CardRule("MサーナイトEX", ["MサーナイトEX RR"], floor=33600, number="020/032"),
+    CardRule("シロナ SR", ["シロナ SR"], floor=22400, number="070/066"),
+    CardRule("シロナのガブリアスex SAR", ["シロナのガブリアスex SAR"], floor=20000, number="087/063"),
+    CardRule("ナンジャモ", ["ナンジャモ"], floor=18000, number="096/071"),
+    CardRule("ブースターEX RR 007/032", ["ブースターEX RR 007/032", "ブースターEX ポケキュンコレクション 007/032"], floor=30400, exclude_names=["XY", "BREAK"], number="007/032"),
+    CardRule("ブラッキーGX SSR", ["ブラッキーGX SSR"], floor=28000, number="229/150"),
+    CardRule("MサーナイトEX RR", ["MサーナイトEX RR"], floor=33600, number="020/032"),
     CardRule("バンギラスV SA", ["バンギラスV SA", "バンギラスV"], floor=20000, number="077/070"),
     # ピカチュウex（スタートデッキ100）：PayPay と同じ検索語・除外（006/023 の版は外す）
     CardRule("ピカチュウex スタートデッキ100", ["ピカチュウex スタートデッキ100", "ピカチュウex 006 023 スタートデッキ100"],
@@ -154,15 +154,15 @@ CARDS: list[CardRule] = [
 # 2 グループに分けて、GitHub で 1 時間に 4 回動かす（PayPay の target_g1 / target_g2 と同じ分け方）
 # 環境変数 CARD_GROUP が "1" か "2" のときは、そのグループのカードだけ読む（空なら全部）
 CARD_GROUP_NAMES: dict[str, list[str]] = {
-    "1": ["緑ミュウ RGB", "赤ミュウ RGB", "青ミュウ RGB", "ブラッキーVMAX SA", "メガリザードンXex SAR インフェルノX",
-          "レックウザVMAX SA", "メガリザードンYex MUR", "ギラティナV SA ロストアビス", "ルギアV SA", "メガリザードンXex MUR",
-          "ミュウVMAX SA", "メガレックウザex MUR ストームエメラルダ", "ニンフィアVMAX SA", "レッドのピカチュウ", "かんこうきゃく",
-          "ピカチュウ 227/S-P", "ピカチュウ&ゼクロムGX", "ブラッキー&ダークライGX", "イーブイ ムンク", "ミュウex 347/190",
-          "ゼクロムex", "レシラムex", "グレイシアVMAX", "ピカチュウex スタートデッキ100"],
-    "2": ["ルチア", "ピカチュウex 764/742", "ビクティニ", "レックウザV", "ピカチュウVMAX", "モクロー ムンク", "ルザミーネ",
-          "リザードンex SAR", "リザードン 25th", "レックウザGX", "ミュウツーGX", "サナ", "ピカチュウ 175/XY-P",
-          "エリカのおもてなし", "こくばバドレックスVMAX", "バシャーモVMAX", "カイリューV", "ピカチュウ 061/SM-P",
-          "シロナ", "シロナのガブリアスex", "ナンジャモ SAR", "ブースターEX", "ブラッキーGX", "MサーナイトEX",
+    "1": ["ミュウ G RGB", "ミュウ R RGB", "ミュウ B RGB", "ブラッキーVMAX SA", "メガリザードンX SAR",
+          "レックウザVMAX SA", "メガリザードンY ex MUR", "ギラティナV SA ロストアビス", "ルギアV SA", "メガリザードンX MUR",
+          "ミュウVMAX SA", "メガレックウザ MUR", "ニンフィアVMAX SA", "レッドのピカチュウ", "かんこうきゃく SR",
+          "ピカチュウ 見返り美人", "ピカチュウ&ゼクロムGX SA", "ブラッキー&ダークライGX SA", "イーブイ ムンク", "ミュウex SAR シャイニートレジャーex",
+          "ゼクロムex BWR", "レシラムex BWR", "グレイシアVMAX SA", "ピカチュウex スタートデッキ100"],
+    "2": ["ルチア SR", "ピカチュウex SAR", "ビクティニ", "レックウザV SR", "ピカチュウVMAX HR", "モクロー 290/SM-P", "ルザミーネ SR",
+          "リザードンex SAR", "リザードン", "レックウザGX SSR", "ミュウツーGX SR", "サナ SR", "ピカチュウ バトルフェスタ2015",
+          "エリカのおもてなし SR", "こくばバドレックスVMAX HR", "バシャーモVMAX SA", "カイリューV SR", "ピカチュウ 061/SM-P",
+          "シロナ SR", "シロナのガブリアスex SAR", "ナンジャモ", "ブースターEX RR 007/032", "ブラッキーGX SSR", "MサーナイトEX RR",
           "バンギラスV SA"],
 }
 _card_group = os.environ.get("CARD_GROUP", "").strip()
@@ -240,9 +240,17 @@ def term_in_name(term: str, name: str) -> bool:
     return squash(term) in squash(name)
 
 
+# レアリティの語は、名前に書かれていなくてもよい（SA・SR などは、番号と SA の判定で確かめる）
+RARITY_WORDS: set[str] = {"HR", "SR", "SSR", "SA", "SAR", "RR", "RRR", "MUR", "BWR", "AR", "UR", "CSR", "CHR", "SAR"}
+
+
 def keyword_fragments_in_name(keyword: str, name: str) -> bool:
-    """検索語の言葉（空白で区切ったもの）が全部、商品名にあるか。"""
-    return all(squash(fragment) in squash(name) for fragment in keyword.split())
+    """検索語の言葉（空白で区切ったもの）が全部、商品名にあるか。レアリティの語は除く。"""
+    return all(
+        squash(fragment) in squash(name)
+        for fragment in keyword.split()
+        if fragment.upper() not in RARITY_WORDS
+    )
 
 
 def number_ok(name: str, target: str) -> bool:
