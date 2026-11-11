@@ -129,7 +129,7 @@ CARDS: list[CardRule] = [
     CardRule("モクロー ムンク", ["モクロー ムンク", "モクロー 290/SM-P"], floor=16000, number="290/SM-P"),
     CardRule("ルザミーネ SR 超次元の暴獣", ["ルザミーネ SR 超次元の暴獣", "ルザミーネ SR 055 050"], floor=70080, number="055/050"),
     CardRule("リザードンex SAR ポケモンカード151", ["リザードンex SAR ポケモンカード151", "リザードンex 201 165"], floor=28000, number="201/165", exclude_names=["PROMO", "1stEdition", "シャイニ", "黒炎", "ハイクラス", "XY", "BREAK"]),
-    CardRule("リザードン 25th ANNIVERSARY", ["リザードン 25th ANNIVERSARY", "リザードン 25th"], floor=22400, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
+    CardRule("リザードン 25th ANNIVERSARY", ["リザードン 25th ANNIVERSARY", "リザードン 25th 001 025"], floor=22400, number="001/025", required=["25th"], exclude_names=["シャイニートレジャー", "M6a", "30th", "リザードンEX", "リザードンex", "わるい", "ロケット団", "コトブキヤ", "ダンデ", "ポケットモンスター", "XY", "BREAK", "フィギュア", "PVC", "ジオラマ", "ぬいぐるみ", "30周年", "復刻", "コイキング", "GX"]),
     CardRule("レックウザGX SSR ウルトラシャイニー", ["レックウザGX SSR ウルトラシャイニー", "レックウザGX SSR 240 150"], floor=24800, number="240/150"),
     CardRule("ミュウツーGX SR ひかる伝説", ["ミュウツーGX SR ひかる伝説", "ミュウツーGX SR"], floor=84800, number="082/072"),
     CardRule("サナ SR THE BEST OF XY", ["サナ SR THE BEST OF XY", "サナ SR 185 171"], floor=46240, number="185/171"),
