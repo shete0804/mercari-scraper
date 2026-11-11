@@ -240,17 +240,9 @@ def term_in_name(term: str, name: str) -> bool:
     return squash(term) in squash(name)
 
 
-# レアリティの語は、名前に書かれていなくてもよい（SA・SR などは、番号と SA の判定で確かめる）
-RARITY_WORDS: set[str] = {"HR", "SR", "SSR", "SA", "SAR", "RR", "RRR", "MUR", "BWR", "AR", "UR", "CSR", "CHR", "SAR"}
-
-
 def keyword_fragments_in_name(keyword: str, name: str) -> bool:
-    """検索語の言葉（空白で区切ったもの）が全部、商品名にあるか。レアリティの語は除く。"""
-    return all(
-        squash(fragment) in squash(name)
-        for fragment in keyword.split()
-        if fragment.upper() not in RARITY_WORDS
-    )
+    """検索語の言葉（空白で区切ったもの）が全部、商品名にあるか。"""
+    return all(squash(fragment) in squash(name) for fragment in keyword.split())
 
 
 def number_ok(name: str, target: str) -> bool:
