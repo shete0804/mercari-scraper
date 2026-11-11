@@ -123,7 +123,7 @@ CARDS: list[CardRule] = [
              exclude_names=["ポルトガル", "フランス", "イタリア", "ドイツ", "スペイン"]),
     CardRule("ルチア SR", ["ルチア SR"], floor=46400, number="104/096"),
     CardRule("ピカチュウex SAR", ["ピカチュウex SAR"], floor=44000, number="764/742", exclude_names=["30th", "MEGA", "ハイクラス"]),
-    CardRule("ビクティニ レッドコレクション", ["ビクティニ レッドコレクション", "ビクティニ SR 070 066"], floor=88000, number="070/066"),
+    CardRule("ビクティニ レッドコレクション", ["ビクティニ レッドコレクション", "ビクティニ SR 070 066"], floor=16106, number="070/066"),
     CardRule("レックウザV SR", ["レックウザV SR"], floor=48000, number="076/067"),
     CardRule("ピカチュウVMAX HR", ["ピカチュウVMAX HR"], floor=29600, number="114/100"),
     CardRule("モクロー ムンク", ["モクロー ムンク", "モクロー 290/SM-P"], floor=16000, number="290/SM-P"),
@@ -139,7 +139,7 @@ CARDS: list[CardRule] = [
     CardRule("バシャーモVMAX SA", ["バシャーモVMAX SA", "バシャーモVMAX HR 086 070"], floor=56000, number="086/070"),
     CardRule("カイリューV SR", ["カイリューV SR"], floor=36000, number="074/067"),
     CardRule("ピカチュウ ポケモンカードフェスタ2017", ["ピカチュウ ポケモンカードフェスタ2017", "ピカチュウ 061/SM-P"], floor=132000, required=["フェスタ2017"], exclude_names=["夏フェスタ"]),
-    CardRule("シロナ SR", ["シロナ SR"], floor=22400, number="070/066"),
+    CardRule("シロナ SR 指差し", ["シロナ SR 指差し", "シロナ SR 070 066"], floor=22400, number="070/066"),
     CardRule("シロナのガブリアスex SAR", ["シロナのガブリアスex SAR"], floor=20000, number="087/063"),
     CardRule("ナンジャモ SAR", ["ナンジャモ SAR"], floor=18000, number="096/071"),
     CardRule("ブースターEX ポケキュンコレクション 007/032", ["ブースターEX ポケキュンコレクション 007/032", "ブースターEX RR 007/032"], floor=30400, exclude_names=["XY", "BREAK"], number="007/032"),
@@ -162,7 +162,7 @@ CARD_GROUP_NAMES: dict[str, list[str]] = {
     "2": ["ルチア SR", "ピカチュウex SAR", "ビクティニ レッドコレクション", "レックウザV SR", "ピカチュウVMAX HR", "モクロー ムンク", "ルザミーネ SR",
           "リザードンex SAR", "リザードン 25th ANNIVERSARY", "レックウザGX SSR ウルトラシャイニー", "ミュウツーGX SR ひかる伝説", "サナ SR THE BEST OF XY", "ピカチュウ バトルフェスタ2015",
           "エリカのおもてなし SR", "こくばバドレックスVMAX SA", "バシャーモVMAX SA", "カイリューV SR", "ピカチュウ ポケモンカードフェスタ2017",
-          "シロナ SR", "シロナのガブリアスex SAR", "ナンジャモ SAR", "ブースターEX ポケキュンコレクション 007/032", "ブラッキーGX SSR", "MサーナイトEX RR",
+          "シロナ SR 指差し", "シロナのガブリアスex SAR", "ナンジャモ SAR", "ブースターEX ポケキュンコレクション 007/032", "ブラッキーGX SSR", "MサーナイトEX RR",
           "バンギラスV SA"],
 }
 _card_group = os.environ.get("CARD_GROUP", "").strip()
