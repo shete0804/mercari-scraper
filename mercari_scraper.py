@@ -114,7 +114,7 @@ CARDS: list[CardRule] = [
     CardRule("かんこうきゃく SR", ["かんこうきゃく SR", "かんこうきゃく SR 192 173 タッグオールスターズ"], floor=40000, number="192/173"),
     CardRule("ピカチュウ 見返り美人", ["ピカチュウ 見返り美人", "ピカチュウ 227 S-P"], floor=160000, required=["227/S-P"]),
     CardRule("ピカチュウ&ゼクロムGX SA", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR 101 095"], floor=80000, sa_numbers=["101/095"]),
-    CardRule("ブラッキー&ダークライGX SA", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR 182 173"], floor=112000, number="182/173", sa_numbers=["182/173"]),
+    CardRule("ブラッキー&ダークライGX SA", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR 182 173"], floor=90000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ ムンク", ["イーブイ ムンク", "イーブイ ムンク 287 SM-P"], floor=100000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"], number="287/SM-P"),
     CardRule("ミュウex SAR シャイニートレジャーex", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR 347 190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
     CardRule("ゼクロムex BWR", ["ゼクロムex BWR", "ゼクロムex 174 086"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
