@@ -112,7 +112,7 @@ CARDS: list[CardRule] = [
              number="093/069", sa_required=True),
     CardRule("レッドのピカチュウ", ["レッドのピカチュウ", "レッドのピカチュウ 270 SM-P"], floor=23200, number="270/SM-P"),
     CardRule("かんこうきゃく SR", ["かんこうきゃく SR", "かんこうきゃく SR 192 173 タッグオールスターズ"], floor=40000, number="192/173"),
-    CardRule("ピカチュウ 見返り美人", ["ピカチュウ 見返り美人", "ピカチュウ 227 S-P"], floor=160000, required=["227/S-P"]),
+    CardRule("ピカチュウ 見返り美人", ["ピカチュウ 見返り美人", "ピカチュウ 227 S-P"], floor=160000, number="227/S-P"),
     CardRule("ピカチュウ&ゼクロムGX SA", ["ピカチュウ&ゼクロムGX SA", "ピカチュウ&ゼクロムGX SR 101 095"], floor=80000, sa_numbers=["101/095"]),
     CardRule("ブラッキー&ダークライGX SA", ["ブラッキー&ダークライGX SA", "ブラッキー&ダークライGX SR 182 173"], floor=70000, number="182/173", sa_numbers=["182/173"]),
     CardRule("イーブイ ムンク", ["イーブイ ムンク", "イーブイ ムンク 287 SM-P"], floor=27000, exclude_names=["イーブイヒーローズ", "VMAX", "GX"], number="287/SM-P"),
@@ -133,7 +133,7 @@ CARDS: list[CardRule] = [
     CardRule("レックウザGX SSR ウルトラシャイニー", ["レックウザGX SSR ウルトラシャイニー", "レックウザGX SSR 240 150"], floor=24800, number="240/150"),
     CardRule("ミュウツーGX SR ひかる伝説", ["ミュウツーGX SR ひかる伝説", "ミュウツーGX SR"], floor=84800, number="082/072"),
     CardRule("サナ SR THE BEST OF XY", ["サナ SR THE BEST OF XY", "サナ SR 185 171"], floor=46240, number="185/171"),
-    CardRule("ピカチュウ バトルフェスタ2015", ["ピカチュウ バトルフェスタ2015", "ピカチュウ 175 XY-P"], floor=80000, required=["175/XY-P"]),
+    CardRule("ピカチュウ バトルフェスタ2015", ["ピカチュウ バトルフェスタ2015", "ピカチュウ 175 XY-P"], floor=63000, number="175/XY-P", exclude_names=["ピンズ","ピンバッジ"]),
     CardRule("エリカのおもてなし SR", ["エリカのおもてなし SR", "エリカのおもてなし SR 190 173 タッグオールスターズ"], floor=31520, number="190/173"),
     CardRule("こくばバドレックスVMAX SA", ["こくばバドレックスVMAX SA", "こくばバドレックスVMAX HR 086 070"], floor=40000, sa_required=True, number="086/070"),
     CardRule("バシャーモVMAX SA", ["バシャーモVMAX SA", "バシャーモVMAX HR 086 070"], floor=56000, number="086/070"),
@@ -246,7 +246,16 @@ def keyword_fragments_in_name(keyword: str, name: str) -> bool:
 
 
 def number_ok(name: str, target: str) -> bool:
-    """番号が書いてあるのに、目的の番号がない出品は外す。番号がない出品は残す。"""
+    """番号が書いてあるのに、目的の番号がない出品は外す。番号がない出品は残す。
+    プロモの番号（175/XY-P・227/S-P・290/SM-P など、記号入り）も同じ扱い。"""
+    if re.search(r"[A-Za-z]", target):
+        norm = lambda s: re.sub(r"\s+", "", s).upper()  # noqa: E731
+        if norm(target) in norm(name):
+            return True
+        # 別のプロモ番号（○○/XX-P 形式）が書いてあれば外す。書いていなければ残す
+        if re.search(r"\d{1,3}\s*/\s*[A-Za-z]{1,3}-[A-Za-z](?![A-Za-z])", name):
+            return False
+        return not NUMBER_RE.search(name)
     found = NUMBER_RE.findall(name)
     if not found:
         return True
