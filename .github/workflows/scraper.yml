@@ -1,11 +1,12 @@
-﻿name: Mercari Scraper
+name: Mercari Scraper
 
 on:
   schedule:
     # UTC 基準。 JST では 09:00 / 15:00 / 21:00 / 翌 03:00 に相当
     # グループ1（5分と35分）と グループ2（20分と50分）。PayPay と同じ時刻
-    - cron: '0 */2 * * *'
-    - cron: '30 */2 * * *'
+    # 日本時間の3時〜5時（UTC 18〜19時）は動かさない（取りこぼし検知の時間）
+    - cron: '0 0-16/2,20,22 * * *'
+    - cron: '30 0-16/2,20,22 * * *'
   workflow_dispatch:
     inputs:
       group:
