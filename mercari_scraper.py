@@ -98,7 +98,7 @@ CARDS: list[CardRule] = [
              number="083/067", sa_required=True),
     CardRule("メガリザードンY ex MUR", ["メガリザードンY ex MUR"], floor=90_000,
              required=["MUR"]),
-    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR 111 100"], floor=42_000,
+    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR 111 100"], floor=60_000,
              number="111/100", sa_required=True, sa_numbers=["111/100"]),
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR 110 098"], floor=37_500,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
