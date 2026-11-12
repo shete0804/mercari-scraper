@@ -99,7 +99,7 @@ CARDS: list[CardRule] = [
     CardRule("メガリザードンY ex MUR", ["メガリザードンY ex MUR"], floor=90_000,
              required=["MUR"]),
     CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR 111 100"], floor=60_000,
-             number="111/100", sa_required=True, sa_numbers=["111/100"]),
+             number="111/100", sa_required=True, sa_numbers=["111/100", "111/"]),  # "111/" はタイトルが「111/…」で切れた出品用（111番の SR は SA だけ）
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR 110 098"], floor=37_500,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
     CardRule("メガリザードンX MUR インフェルノX", ["メガリザードンX MUR インフェルノX", "メガリザードンX MUR 116 080"], floor=50_000,
