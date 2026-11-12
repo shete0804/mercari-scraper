@@ -119,7 +119,7 @@ CARDS: list[CardRule] = [
     CardRule("ミュウex SAR シャイニートレジャーex", ["ミュウex SAR シャイニートレジャーex", "ミュウex SAR 347 190"], floor=32000, number="347/190", exclude_names=["151", "30周年", "エラー", "ピカチュウex", "ミュウツーex"], desc_exclude=["151", "205/165"]),
     CardRule("ゼクロムex BWR", ["ゼクロムex BWR", "ゼクロムex 174 086"], floor=32000, number="174/086", exclude_names=["BW-P", "プロモ"]),
     CardRule("レシラムex BWR", ["レシラムex BWR", "レシラムex 174 086"], floor=36000, number="174/086", exclude_names=["BW-P", "プロモ"]),
-    CardRule("グレイシアVMAX SA", ["グレイシアVMAX SA", "グレイシアVMAX HR 091 069"], floor=56000, number="091/069",
+    CardRule("グレイシアVMAX SA", ["グレイシアVMAX SA", "グレイシアVMAX HR 091 069"], floor=20000, number="091/069",
              exclude_names=["ポルトガル", "フランス", "イタリア", "ドイツ", "スペイン"]),
     CardRule("ルチア SR", ["ルチア SR", "ルチア 104 096 裂空のカリスマ"], floor=46400, number="104/096"),
     CardRule("ピカチュウex SAR 超電ブレイカー", ["ピカチュウex SAR 超電ブレイカー", "ピカチュウex SAR 132 106"], floor=26000, number="132/106", exclude_names=["30th", "MEGA", "ハイクラス"]),
