@@ -98,7 +98,7 @@ CARDS: list[CardRule] = [
              number="083/067", sa_required=True),
     CardRule("メガリザードンY ex MUR", ["メガリザードンY ex MUR"], floor=90_000,
              required=["MUR"]),
-    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR 111 100"], floor=60_000,
+    CardRule("ギラティナV SA ロストアビス", ["ギラティナV SA ロストアビス", "ギラティナV SR 111 100", "ギラティナV SR ロストアビス"], floor=60_000,
              number="111/100", sa_required=True, sa_numbers=["111/100", "111/"]),  # "111/" はタイトルが「111/…」で切れた出品用（111番の SR は SA だけ）
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR 110 098"], floor=37_500,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
@@ -362,25 +362,31 @@ async def scrape_card(m: PagedMercapi, card: CardRule) -> list[Listing]:
     windows = [(kw, floor) for kw in dict.fromkeys(card.keywords)]
 
     # 2つの検索を合わせ、どの検索語・下限で見つかったかを覚えておく
-    pool: dict[str, tuple[object, str, int]] = {}
+    # 同じ出品が複数の検索で見つかることがある。どの検索語でも判定できるよう、見つかった検索語を全部覚える
+    pool: dict[str, tuple[object, list[str], int]] = {}
     for keyword, floor in windows:
         items = await with_retry(
             f"{card.name} [{keyword}]",
             lambda k=keyword, f=floor: search_window(m, k, f),
         )
         for item in items:
-            pool.setdefault(item.id_, (item, keyword, floor))
+            entry = pool.setdefault(item.id_, (item, [], floor))
+            if keyword not in entry[1]:
+                entry[1].append(keyword)
 
     listings: list[Listing] = []
     checked = 0
-    for item, keyword, floor in sorted(pool.values(), key=lambda t: t[0].price):
+    for item, found_keywords, floor in sorted(pool.values(), key=lambda t: t[0].price):
         if len(listings) >= TOP_N or checked >= MAX_DETAIL_CHECKS:
             break
         if item.price < floor or item.price > MAX_PRICE or not is_on_sale(item) or is_auction(item) or not is_recent(item):
             continue
-        # 「X HR」の検索で取れた出品は、SA の表記を問わない（HR の検索語のときだけ SA の判定を外す）
-        is_hr_search = keyword.upper().endswith(" HR")
-        if not keyword_fragments_in_name(keyword, item.name) or not name_passes(item.name, card, check_sa=not is_hr_search):
+        # 見つかった検索語のどれか1つで合格すればよい。「X HR」の検索語のときだけ SA の判定を外す
+        if not any(
+            keyword_fragments_in_name(kw, item.name)
+            and name_passes(item.name, card, check_sa=not kw.upper().endswith(" HR"))
+            for kw in found_keywords
+        ):
             continue
 
         # 店舗の出品（ID が m で始まらない）：商品詳細の API では取れない。
