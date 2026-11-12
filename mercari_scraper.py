@@ -102,7 +102,7 @@ CARDS: list[CardRule] = [
              number="111/100", sa_required=True, sa_numbers=["111/100"]),
     CardRule("ルギアV SA", ["ルギアV SA", "ルギアV SR 110 098"], floor=37_500,
              number="110/098", sa_required=True, sa_numbers=["110/098"]),
-    CardRule("メガリザードンX MUR インフェルノX", ["メガリザードンX MUR インフェルノX"], floor=50_000,
+    CardRule("メガリザードンX MUR インフェルノX", ["メガリザードンX MUR インフェルノX", "メガリザードンX MUR 116 080"], floor=50_000,
              number="116/080", required=["MUR"]),
     CardRule("ミュウVMAX SA", ["ミュウVMAX SA", "ミュウVMAX HR 119"], floor=45_000,
              number="119", sa_required=True),
