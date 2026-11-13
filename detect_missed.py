@@ -87,6 +87,14 @@ def medium_pass(rule: ms.CardRule, title: str) -> bool:
     return all(ms.squash(t) in ms.squash(title) for t in short_keyword(rule).split())
 
 
+def confident_pass(rule: ms.CardRule, title: str) -> bool:
+    """確信できるもの（サイトの一覧に入れてよいもの）。
+    番号のあるカード：番号が題名に書いてある。番号のないカード：題名が切れていなくて、検索語の言葉が全部ある。"""
+    if rule.number:
+        return number_in_title(rule.number, title)
+    return (not title.rstrip().endswith("…")) and all(ms.squash(t) in ms.squash(title) for t in short_keyword(rule).split())
+
+
 def paypay_search(keyword: str, min_price: int) -> list[dict]:
     url = "https://paypayfleamarket.yahoo.co.jp/search/" + requests.utils.quote(keyword, safe="")
     r = requests.get(
@@ -140,7 +148,7 @@ def detect_paypay(rule, keyword, floor_min, top, listed) -> list[dict]:
         if not medium_pass(rule, it["title"]) or strict_pass(rule, it["title"]):
             continue
         out.append({"site": "PayPay", "card": rule.name, "price": price, "title": it["title"][:50], "url": url,
-                    "now_top": top})
+                    "now_top": top, "confident": confident_pass(rule, it["title"])})
     return out
 
 
@@ -159,7 +167,7 @@ async def detect_mercari(m, rule, keyword, floor_min, top, listed) -> list[dict]
         if not medium_pass(rule, it.name) or strict_pass(rule, it.name):
             continue
         out.append({"site": "メルカリ", "card": rule.name, "price": it.price, "title": it.name[:50], "url": url,
-                    "now_top": top})
+                    "now_top": top, "confident": confident_pass(rule, it.name)})
     return out
 
 
@@ -217,9 +225,10 @@ async def main() -> int:
     LATEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     with LATEST_PATH.open("w", encoding="utf-8", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["検知日", "サイト", "カード", "価格", "今の最安", "題名", "URL"])
+        w.writerow(["検知日", "サイト", "カード", "価格", "今の最安", "題名", "URL", "確信"])
         for f in sorted(uniq.values(), key=lambda x: (x["card"], x["price"])):
-            w.writerow([today, f["site"], f["card"], f["price"], f["now_top"] or "", f["title"], f["url"]])
+            w.writerow([today, f["site"], f["card"], f["price"], f["now_top"] or "", f["title"], f["url"],
+                        "はい" if f.get("confident") else "いいえ"])
     for f in new:
         seen[f["url"]] = today
     SEEN_PATH.write_text(json.dumps(seen, ensure_ascii=False, indent=1), encoding="utf-8")
