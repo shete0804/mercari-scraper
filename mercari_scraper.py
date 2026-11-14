@@ -562,8 +562,8 @@ def post_failure(title: str, detail: str) -> None:
 
 def main() -> int:
     if not DISCORD_WEBHOOK_URL:
-        print("環境変数 DISCORD_WEBHOOK_URL が必要です", file=sys.stderr)
-        return 1
+        # PC から動かすときは Discord に送らない（GitHub 側の実行が報告する）。CSV は書く
+        print("DISCORD_WEBHOOK_URL 未設定：Discord には送らず、CSV だけ書きます", file=sys.stderr)
 
     try:
         results, errors = asyncio.run(fetch_all())
