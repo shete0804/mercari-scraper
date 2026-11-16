@@ -90,6 +90,9 @@ def medium_pass(rule: ms.CardRule, title: str) -> bool:
 def confident_pass(rule: ms.CardRule, title: str) -> bool:
     """確信できるもの（サイトの一覧に入れてよいもの）。
     番号のあるカード：番号が題名に書いてある。番号のないカード：題名が切れていなくて、検索語の言葉が全部ある。"""
+    # まとめ売り（「ほか」「まとめ」・カード名を「、」で並べた題名）は、1枚の出品ではないので確信しない
+    if any(w in title for w in ("ほか", "まとめ", "、")):
+        return False
     if rule.number:
         return number_in_title(rule.number, title)
     return (not title.rstrip().endswith("…")) and all(ms.squash(t) in ms.squash(title) for t in short_keyword(rule).split())
