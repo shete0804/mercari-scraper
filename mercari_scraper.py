@@ -268,6 +268,9 @@ def number_ok(name: str, target: str) -> bool:
 def name_passes(name: str, card: CardRule, check_sa: bool = True) -> bool:
     """カードごとの名前の判定（除外語・必須語・SA・番号）。
     check_sa=False は「X HR」の検索で取れた出品（SA の表記を問わない）に使う。"""
+    # 「ほか」が空白で区切られた1単語で入っている題名は、まとめ売りなので外す（部分一致ではなく単語で判定）
+    if any(tok == "ほか" for tok in re.split(r"[\s　]+", name)):
+        return False
     # 共通の除外語でも、そのカードの検索語に入っている語は外さない（例：スタートデッキ100 の「デッキ」）
     global_terms = [t for t in GLOBAL_EXCLUDE_NAMES if not any(t in kw for kw in card.keywords)]
     if any(term_in_name(term, name) for term in global_terms + card.exclude_names):

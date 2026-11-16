@@ -93,6 +93,8 @@ def confident_pass(rule: ms.CardRule, title: str) -> bool:
     # まとめ売り（「ほか」「まとめ」・カード名を「、」で並べた題名）は、1枚の出品ではないので確信しない
     if any(w in title for w in ("まとめ", "、")):
         return False
+    if any(tok == "ほか" for tok in re.split(r"[\s　]+", title)):
+        return False
     if rule.number:
         return number_in_title(rule.number, title)
     return (not title.rstrip().endswith("…")) and all(ms.squash(t) in ms.squash(title) for t in short_keyword(rule).split())
